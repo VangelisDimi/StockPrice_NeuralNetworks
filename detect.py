@@ -1,11 +1,11 @@
 import argparse
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-d')
-parser.add_argument('-n')
-parser.add_argument('-mae')
+from agent import LSTM_encoder_decoder
+from utils import ArgumentParser
 
-args = parser.parse_args()
-dataset = args.d
-number_of_time_series_selected = args.n
-error_value_as_double = args.mae
+parser = ArgumentParser()
+agent = LSTM_encoder_decoder(dataset=parser.dataset, batch_size=parser.batch_size, num_epochs=parser.num_epochs, 
+            num_layers=parser.num_layers, layers_size=parser.layers_size, look_back=parser.look_back)
+agent.fit()
+agent.score()
+agent.plot()

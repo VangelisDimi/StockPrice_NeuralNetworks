@@ -11,7 +11,6 @@ from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 numpy.random.seed(21)
 
-
 class multiLayer_LSTM():
     def __init__(self, dataset, batch_size, num_epochs, num_layers, layers_size, dropout_rate=0.2, look_back=1):
 

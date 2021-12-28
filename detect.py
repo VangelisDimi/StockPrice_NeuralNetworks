@@ -9,4 +9,3 @@ args = parser.parse_args()
 dataset = args.d
 number_of_time_series_selected = args.n
 error_value_as_double = args.mae
-

@@ -1,4 +1,3 @@
-import argparse
 from utils import ArgumentParser
 from agent import CNN_autoencoder
 

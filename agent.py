@@ -1,6 +1,6 @@
-#Supress cuda warnings on non-nvidia pc's
+#Supress cuda warnings on non-nvidia computers
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import numpy
 import matplotlib.pyplot as plt
@@ -13,6 +13,7 @@ from keras.layers import Dropout
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
+
 numpy.random.seed(21)
 
 class multiLayer_LSTM():
@@ -26,14 +27,16 @@ class multiLayer_LSTM():
         self.layers_size = layers_size
         self.look_back = look_back
 
-        self.training_set = self.dataset.iloc[:math.ceil(self.dataset.shape[0]/5), 1:self.dataset.shape[1]].values
-        self.test_set = self.dataset.iloc[math.ceil(self.dataset.shape[0]/5):, 1:self.dataset.shape[1]].values
+        self._dataset = self.dataset.iloc[:, 1:self.dataset.shape[1]].values
 
         # normalize the dataset
         self.scaler = MinMaxScaler(feature_range=(0, 1))
-        self.dataset = self.scaler.fit_transform(self.training_set)
+        self._dataset = self.scaler.fit_transform(self._dataset)
 
-        self.train_X, self.train_Y, self.test_X, self.test_Y = train_test_split(self.training_set)
+        # y=numpy.array(list(range(len(self._dataset))))
+        y=range(len(self._dataset))
+
+        self.train_X, self.train_Y, self.test_X, self.test_Y = train_test_split(self._dataset,y,test_size=0.75,train_size=0.25,shuffle=True)
 
         # create and fit the LSTM network
         self.model = Sequential()

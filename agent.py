@@ -35,10 +35,11 @@ class multiLayer_LSTM():
 
         y=numpy.array(list(range(len(self._dataset))))
 
-        self.train_X, self.test_Y, self.train_Y, self.test_Y = train_test_split(self._dataset,y,test_size=0.75,train_size=0.25,shuffle=True)
+        self.train_X, self.test_X, self.train_Y, self.test_Y = train_test_split(self._dataset,y,test_size=0.75,train_size=0.25,shuffle=True)
 
         # create and fit the LSTM network
         self.model = Sequential()
+        self.model.add(LSTM(units = 50, return_sequences = True, input_shape = (self.train_X.shape[1], 1)))
         self.model.add(LSTM(num_layers, input_shape=layers_size))
         self.model.add(Dense(1))
         self.model.add(Dropout(rate=dropout_rate, input_shape=layers_size))
@@ -80,6 +81,7 @@ class multiLayer_LSTM():
         plt.plot(train_plot)
         plt.plot(test_plot)
         plt.show()
+        plt.savefig('plot_multiLayer_LSTM.png')
 
 
 class LSTM_encoder_decoder():

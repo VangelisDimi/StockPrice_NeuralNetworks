@@ -33,10 +33,9 @@ class multiLayer_LSTM():
         self.scaler = MinMaxScaler(feature_range=(0, 1))
         self._dataset = self.scaler.fit_transform(self._dataset)
 
-        # y=numpy.array(list(range(len(self._dataset))))
-        y=range(len(self._dataset))
+        y=numpy.array(list(range(len(self._dataset))))
 
-        self.train_X, self.train_Y, self.test_X, self.test_Y = train_test_split(self._dataset,y,test_size=0.75,train_size=0.25,shuffle=True)
+        self.train_X, self.test_Y, self.train_Y, self.test_Y = train_test_split(self._dataset,y,test_size=0.75,train_size=0.25,shuffle=True)
 
         # create and fit the LSTM network
         self.model = Sequential()

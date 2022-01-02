@@ -1,4 +1,6 @@
 import argparse
+from keras.backend import print_tensor
+import pandas
 
 class ArgumentParser():
     def __init__(self):
@@ -26,3 +28,12 @@ class ArgumentParser():
         self.batch_size = args.batch_size
         self.layers_size = args.layers_size
         self.num_epochs = args.num_epochs
+
+def create_dataset(dataset):
+    #Columns: stock_id,day1,......,dayN
+    df = pandas.read_csv(dataset,'\t')
+    column_names=['id']
+    for i in range(1,df.shape[1]): column_names.append(i)
+    df=df.set_axis(column_names, axis='columns', inplace=False)
+
+    return df

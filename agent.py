@@ -18,9 +18,7 @@ numpy.random.seed(21)
 class multiLayer_LSTM():
     def __init__(self, dataset, batch_size, num_epochs, num_layers, layers_size, dropout_rate=0.2, look_back=1):
 
-        dataframe = pandas.read_csv(dataset)
-        self.dataset = dataframe.values
-        self.dataset = self.dataset.astype('float32')
+        self.dataset = dataset
 
         self.batch_size = batch_size
         self.num_epochs = num_epochs
@@ -28,11 +26,14 @@ class multiLayer_LSTM():
         self.layers_size = layers_size
         self.look_back = look_back
 
+        self.training_set = self.dataset.iloc[:math.ceil(self.dataset.shape[0]/5), 1:self.dataset.shape[1]].values
+        self.test_set = self.dataset.iloc[math.ceil(self.dataset.shape[0]/5):, 1:self.dataset.shape[1]].values
+
         # normalize the dataset
         self.scaler = MinMaxScaler(feature_range=(0, 1))
-        self.dataset = self.scaler.fit_transform(self.dataset)
+        self.dataset = self.scaler.fit_transform(self.training_set)
 
-        self.train_X, self.train_Y, self.test_X, self.test_Y = train_test_split(self.dataset)
+        self.train_X, self.train_Y, self.test_X, self.test_Y = train_test_split(self.training_set)
 
         # create and fit the LSTM network
         self.model = Sequential()
@@ -81,10 +82,8 @@ class multiLayer_LSTM():
 
 class LSTM_encoder_decoder():
     def __init__(self, dataset, batch_size, num_epochs, num_layers, layers_size, dropout_rate=0.2, look_back=1):
-
-        dataframe = pandas.read_csv(dataset)
-        self.dataset = dataframe.values
-        self.dataset = self.dataset.astype('float32')
+        
+        self.dataset = dataset
 
         self.batch_size = batch_size
         self.num_epochs = num_epochs
@@ -146,9 +145,7 @@ class LSTM_encoder_decoder():
 class CNN_autoencoder():
     def __init__(self, dataset, batch_size, num_epochs, num_layers, layers_size, dropout_rate=0.2, look_back=1):
 
-        dataframe = pandas.read_csv(dataset)
-        self.dataset = dataframe.values
-        self.dataset = self.dataset.astype('float32')
+        self.dataset = dataset
 
         self.batch_size = batch_size
         self.num_epochs = num_epochs

@@ -13,6 +13,7 @@ class ArgumentParser():
         parser.add_argument('-mae', type=float, default=None)
         parser.add_argument('-batch_size', type=int, default=3)
         parser.add_argument('-num_layers', type=int, default=4)
+        parser.add_argument('-num_units', type=int, default=50)
         parser.add_argument('-layers_size', type=tuple, default=(1,1))
         parser.add_argument('-num_epochs', type=int, default=10)
 

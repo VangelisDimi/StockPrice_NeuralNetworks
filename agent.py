@@ -17,10 +17,10 @@ from sklearn.model_selection import train_test_split
 numpy.random.seed(21)
 
 class multiLayer_LSTM():
-    def __init__(self, dataset, batch_size, num_epochs, num_layers, layers_size, dropout_rate=0.2, look_back=1):
+    def __init__(self, dataset, batch_size, num_epochs, num_layers, num_units, layers_size, dropout_rate=0.2, look_back=1):
 
         self.dataset = dataset
-
+        self.num_units = num_units
         self.batch_size = batch_size
         self.num_epochs = num_epochs
         self.num_layers = num_layers
@@ -36,14 +36,19 @@ class multiLayer_LSTM():
         y=numpy.array(list(range(len(self._dataset))))
 
         self.train_X, self.test_X, self.train_Y, self.test_Y = train_test_split(self._dataset,y,test_size=0.75,train_size=0.25,shuffle=True)
-
-        # create and fit the LSTM network
+ 
         self.model = Sequential()
-        self.model.add(LSTM(units = 50, return_sequences = True, input_shape = (self.train_X.shape[1], 1)))
-        self.model.add(LSTM(num_layers, input_shape=layers_size))
-        self.model.add(Dense(1))
-        self.model.add(Dropout(rate=dropout_rate, input_shape=layers_size))
-        self.model.compile(loss='mean_squared_error', optimizer='adam')
+        for i in range(self.num_layers):
+            self.model.add(LSTM(units = self.num_units, return_sequences = True, input_shape = (self.X_train.shape[1], 1)))
+            self.model.add(Dropout(dropout_rate))
+
+        self.model.add(Dense(units = 1))
+
+        # Compiling the RNN
+        self.model.compile(optimizer = 'adam', loss = 'mean_squared_error')
+
+        # Fitting the RNN to the Training set
+        self.model.fit(self.X_train, self.y_train, epochs = self.num_epochs, batch_size = self.batch_size)
 
     def fit(self):
         self.model.fit(self.train_X, self.train_Y, epochs=self.num_epochs, batch_size=self.batch_size, verbose=2)
@@ -85,7 +90,7 @@ class multiLayer_LSTM():
 
 
 class LSTM_encoder_decoder():
-    def __init__(self, dataset, batch_size, num_epochs, num_layers, layers_size, dropout_rate=0.2, look_back=1):
+    def __init__(self, dataset, batch_size, num_epochs, num_layers, num_units, layers_size, dropout_rate=0.2, look_back=1):
         
         self.dataset = dataset
 
@@ -147,7 +152,7 @@ class LSTM_encoder_decoder():
 
 
 class CNN_autoencoder():
-    def __init__(self, dataset, batch_size, num_epochs, num_layers, layers_size, dropout_rate=0.2, look_back=1):
+    def __init__(self, dataset, batch_size, num_epochs, num_layers, num_units, layers_size, dropout_rate=0.2, look_back=1):
 
         self.dataset = dataset
 

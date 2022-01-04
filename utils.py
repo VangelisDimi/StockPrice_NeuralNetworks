@@ -26,6 +26,7 @@ class ArgumentParser():
         self.number_of_time_series_selected = args.n
         self.look_back=1
         self.num_layers = args.num_layers
+        self.num_units = args.num_units
         self.batch_size = args.batch_size
         self.layers_size = args.layers_size
         self.num_epochs = args.num_epochs

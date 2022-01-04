@@ -39,16 +39,13 @@ class multiLayer_LSTM():
  
         self.model = Sequential()
         for i in range(self.num_layers):
-            self.model.add(LSTM(units = self.num_units, return_sequences = True, input_shape = (self.X_train.shape[1], 1)))
+            self.model.add(LSTM(units = self.num_units, return_sequences = True, input_shape = (self.train_X.shape[1], 1)))
             self.model.add(Dropout(dropout_rate))
 
         self.model.add(Dense(units = 1))
 
         # Compiling the RNN
         self.model.compile(optimizer = 'adam', loss = 'mean_squared_error')
-
-        # Fitting the RNN to the Training set
-        self.model.fit(self.X_train, self.y_train, epochs = self.num_epochs, batch_size = self.batch_size)
 
     def fit(self):
         self.model.fit(self.train_X, self.train_Y, epochs=self.num_epochs, batch_size=self.batch_size, verbose=2)

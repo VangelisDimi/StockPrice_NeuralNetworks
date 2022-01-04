@@ -17,7 +17,7 @@ from sklearn.model_selection import train_test_split
 numpy.random.seed(21)
 
 class multiLayer_LSTM():
-    def __init__(self, dataset, batch_size, num_epochs, num_layers, layers_size, dropout_rate=0.2, look_back=1 , train_size = 0.2 , test_size = 0.8):
+    def __init__(self, dataset, batch_size, num_epochs, num_layers, num_units, layers_size, dropout_rate=0.2, look_back=1 , train_size = 0.2 , test_size = 0.8):
 
         self.dataset = dataset
         self.num_units = num_units
@@ -99,7 +99,7 @@ class LSTM_encoder_decoder():
     def __init__(self, dataset, batch_size, num_epochs, num_layers, num_units, layers_size, dropout_rate=0.2, look_back=1):
         
         self.dataset = dataset
-
+        self.num_units = num_units
         self.batch_size = batch_size
         self.num_epochs = num_epochs
         self.num_layers = num_layers
@@ -161,7 +161,7 @@ class CNN_autoencoder():
     def __init__(self, dataset, batch_size, num_epochs, num_layers, num_units, layers_size, dropout_rate=0.2, look_back=1):
 
         self.dataset = dataset
-
+        self.num_units = num_units
         self.batch_size = batch_size
         self.num_epochs = num_epochs
         self.num_layers = num_layers

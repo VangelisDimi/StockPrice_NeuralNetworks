@@ -1,5 +1,5 @@
 from agent import multiLayer_LSTM
-from utils import ArgumentParser,create_dataset
+from utils import ArgumentParser, create_dataset
 
 if __name__ == "__main__":
     parser = ArgumentParser()

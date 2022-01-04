@@ -1,5 +1,5 @@
-from agent import LSTM_encoder_decoder,create_dataset
-from utils import ArgumentParser
+from agent import LSTM_encoder_decoder
+from utils import ArgumentParser, create_dataset
 
 if __name__ == "__main__":
     parser = ArgumentParser()

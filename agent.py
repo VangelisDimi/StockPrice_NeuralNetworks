@@ -26,7 +26,7 @@ class multiLayer_LSTM():
         self.num_layers = num_layers
         self.layers_size = layers_size
         self.look_back = look_back
-
+        self.dropout_rate = dropout_rate
         self._dataset = self.dataset.iloc[:, 1:self.dataset.shape[1]].values
 
         # normalize the dataset
@@ -40,7 +40,7 @@ class multiLayer_LSTM():
         self.model = Sequential()
         for i in range(self.num_layers):
             self.model.add(LSTM(units = self.num_units, return_sequences = True, input_shape = (self.X_train.shape[1], 1)))
-            self.model.add(Dropout(dropout_rate))
+            self.model.add(Dropout(self.dropout_rate))
 
         self.model.add(Dense(units = 1))
 
@@ -54,20 +54,22 @@ class multiLayer_LSTM():
         self.model.fit(self.train_X, self.train_Y, epochs=self.num_epochs, batch_size=self.batch_size, verbose=2)
 
     def score(self):
-        # make predictions
-        self.pred_train_X = self.model.predict(self.train_X)
         self.pred_test_X = self.model.predict(self.test_X)
-
-        # invert predictions
-        self.pred_train_X = self.scaler.inverse_transform(self.pred_train_X)
-        train_Y = self.scaler.inverse_transform([self.train_Y])
         self.pred_test_X = self.scaler.inverse_transform(self.pred_test_X)
-        test_Y = self.scaler.inverse_transform([self.test_Y])
+        # # make predictions
+        # self.pred_train_X = self.model.predict(self.train_X)
+        # self.pred_test_X = self.model.predict(self.test_X)
 
-        # calculate root mean squared error
-        train_score = math.sqrt(mean_squared_error(train_Y[0], self.pred_train_X[:,0]))
-        print('Train Score: %.2f RMSE' % (train_score))
-        test_score = math.sqrt(mean_squared_error(test_Y[0], self.pred_test_X[:,0]))
+        # # invert predictions
+        # self.pred_train_X = self.scaler.inverse_transform(self.pred_train_X)
+        # train_Y = self.scaler.inverse_transform([self.train_Y])
+        # self.pred_test_X = self.scaler.inverse_transform(self.pred_test_X)
+        # test_Y = self.scaler.inverse_transform([self.test_Y])
+
+        # # calculate root mean squared error
+        # train_score = math.sqrt(mean_squared_error(train_Y[0], self.pred_train_X[:,0]))
+        # print('Train Score: %.2f RMSE' % (train_score))
+        test_score = math.sqrt(mean_squared_error(self.test_Y[0], self.pred_test_X[:,0]))
         print('Test Score: %.2f RMSE' % (test_score))
 
     def plot(self):

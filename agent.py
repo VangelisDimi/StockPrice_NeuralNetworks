@@ -17,7 +17,7 @@ from sklearn.model_selection import train_test_split
 numpy.random.seed(21)
 
 class multiLayer_LSTM():
-    def __init__(self, dataset, batch_size, num_epochs, num_layers, layers_size, dropout_rate=0.2, look_back=1):
+    def __init__(self, dataset, batch_size, num_epochs, num_layers, layers_size, dropout_rate=0.2, look_back=1 , train_size = 0.2 , test_size = 0.8):
 
         self.dataset = dataset
 
@@ -26,7 +26,7 @@ class multiLayer_LSTM():
         self.num_layers = num_layers
         self.layers_size = layers_size
         self.look_back = look_back
-
+        
         self._dataset = self.dataset.iloc[:, 1:self.dataset.shape[1]].values
 
         # normalize the dataset
@@ -35,14 +35,28 @@ class multiLayer_LSTM():
 
         y=numpy.array(list(range(len(self._dataset))))
 
-        self.train_X, self.test_X, self.train_Y, self.test_Y = train_test_split(self._dataset,y,test_size=0.75,train_size=0.25,shuffle=True)
+        #Split and reshape the dataset
+        self.train_X, self.test_X, self.train_Y, self.test_Y = train_test_split(self._dataset,y,train_size=train_size,test_size=test_size,shuffle=True)
+        self.train_X = numpy.reshape(self.train_X, (self.train_X.shape[0], self.train_X.shape[1], 1))
+        self.test_X = numpy.reshape(self.test_X, (self.test_X.shape[0], self.test_X.shape[1], 1))
 
-        # create and fit the LSTM network
+        # create the LSTM network
         self.model = Sequential()
+        #1
         self.model.add(LSTM(units = 50, return_sequences = True, input_shape = (self.train_X.shape[1], 1)))
-        self.model.add(LSTM(num_layers, input_shape=layers_size))
-        self.model.add(Dense(1))
         self.model.add(Dropout(rate=dropout_rate, input_shape=layers_size))
+        #2
+        self.model.add(LSTM(units = 50, return_sequences = True, input_shape=layers_size))
+        self.model.add(Dropout(rate=dropout_rate, input_shape=layers_size))
+        #3
+        self.model.add(LSTM(units = 50, return_sequences = True, input_shape=layers_size))
+        self.model.add(Dropout(rate=dropout_rate, input_shape=layers_size))
+        #4
+        self.model.add(LSTM(units = 50, input_shape=layers_size))
+        self.model.add(Dropout(rate=dropout_rate, input_shape=layers_size))
+        #Output
+        self.model.add(Dense(units = 1))
+        #Compile
         self.model.compile(loss='mean_squared_error', optimizer='adam')
 
     def fit(self):

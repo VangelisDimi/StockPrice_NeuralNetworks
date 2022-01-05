@@ -41,10 +41,6 @@ class multiLayer_LSTM():
         self.test_X = numpy.reshape(self.test_X, (self.test_X.shape[0], self.test_X.shape[1], 1))
  
         self.model = Sequential()
-        #First Layer
-        self.model.add(LSTM(units = 50, return_sequences = True, input_shape = (self.train_X.shape[1], 1)))
-        self.model.add(Dropout(self.dropout_rate))
-        #Add layers
         for i in range(self.num_layers):
             self.model.add(LSTM(units = self.num_units, return_sequences = True))
             self.model.add(Dropout(self.dropout_rate))
@@ -105,6 +101,7 @@ class LSTM_encoder_decoder():
         self.num_layers = num_layers
         self.layers_size = layers_size
         self.look_back = look_back
+        self.dropout_rate = dropout_rate
 
         # normalize the dataset
         self.scaler = MinMaxScaler(feature_range=(0, 1))
@@ -112,11 +109,12 @@ class LSTM_encoder_decoder():
 
         self.train_X, self.train_Y, self.test_X, self.test_Y = train_test_split(self.dataset)
 
-        # create and fit the LSTM network
         self.model = Sequential()
-        self.model.add(LSTM(num_layers, input_shape=layers_size))
-        self.model.add(Dense(1))
-        self.model.add(Dropout(rate=dropout_rate, input_shape=layers_size))
+        for i in range(self.num_layers):
+            self.model.add(LSTM(units = self.num_units, return_sequences = True))
+            self.model.add(Dropout(self.dropout_rate))
+        #Output Layer
+        self.model.add(Dense(units = 1))
         self.model.compile(loss='mean_squared_error', optimizer='adam')
 
     def fit(self):

@@ -41,6 +41,10 @@ class multiLayer_LSTM():
         self.test_X = numpy.reshape(self.test_X, (self.test_X.shape[0], self.test_X.shape[1], 1))
  
         self.model = Sequential()
+        #First Layer
+        self.model.add(LSTM(units = self.num_units, return_sequences = True, input_shape = (self.train_X.shape[1], 1)))
+        self.model.add(Dropout(self.dropout_rate))
+        #Add layers
         for i in range(self.num_layers):
             self.model.add(LSTM(units = self.num_units, return_sequences = True))
             self.model.add(Dropout(self.dropout_rate))

@@ -18,7 +18,7 @@ import random
 np.random.seed(21)
 
 class multiLayer_LSTM():
-    def __init__(self, dataset, batch_size, num_epochs, num_layers, num_units, dropout_rate=0.2, look_back=60, train_size = 0.8):
+    def __init__(self, dataset, batch_size=3, num_epochs=10, num_layers=3, num_units=50, dropout_rate=0.2, look_back=60, train_size = 0.8):
         #Initialize network
         self.dataset = dataset
         self.num_units = num_units

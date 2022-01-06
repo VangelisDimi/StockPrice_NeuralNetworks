@@ -7,7 +7,7 @@ import pandas
 class ArgumentParser():
     def __init__(self):
         parser = argparse.ArgumentParser()
-        parser.add_argument('-d', type=str, default="Examples/nasd_input.csv")
+        parser.add_argument('-d', type=str)
         parser.add_argument('-n', type=int, default=10)
         parser.add_argument('-q', type=str, default=None)
         parser.add_argument('-od', type=str, default="output_dataset.pkl")

@@ -18,14 +18,13 @@ import random
 np.random.seed(21)
 
 class multiLayer_LSTM():
-    def __init__(self, dataset, batch_size, num_epochs, num_layers, num_units, layers_size, dropout_rate=0.2, look_back=1, train_size = 0.8, test_size = 0.2):
+    def __init__(self, dataset, batch_size, num_epochs, num_layers, num_units, dropout_rate=0.2, look_back=60, train_size = 0.8):
         #Initialize network
         self.dataset = dataset
         self.num_units = num_units
         self.batch_size = batch_size
         self.num_epochs = num_epochs
         self.num_layers = num_layers
-        self.layers_size = layers_size
         self.look_back = look_back
         self.dropout_rate = dropout_rate
         
@@ -86,6 +85,7 @@ class multiLayer_LSTM():
     def fit(self):
         #Fit all datasets to model
         for i in range(len(self.X_train)):
+            print("Fitting: ",i+1,"/",len(self.X_train))
             self.model.fit(self.X_train[i], self.y_train[i], epochs=self.num_epochs, batch_size=self.batch_size)
 
     def predict(self,i):

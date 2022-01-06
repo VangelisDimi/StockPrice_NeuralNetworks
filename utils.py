@@ -1,5 +1,6 @@
 import argparse
 from keras.backend import print_tensor
+from keras.utils.generic_utils import default
 import pandas
 
 class ArgumentParser():
@@ -14,8 +15,8 @@ class ArgumentParser():
         parser.add_argument('-batch_size', type=int, default=3)
         parser.add_argument('-num_layers', type=int, default=4)
         parser.add_argument('-num_units', type=int, default=50)
-        parser.add_argument('-layers_size', type=tuple, default=(1,1))
         parser.add_argument('-num_epochs', type=int, default=10)
+        parser.add_argument('-lookback', type=int, default=30)
 
         args = parser.parse_args()
         self.dataset = args.d
@@ -24,11 +25,10 @@ class ArgumentParser():
         self.output_query_file = args.oq
         self.error_value_as_double = args.mae
         self.number_of_time_series_selected = args.n
-        self.look_back=10
+        self.look_back=args.lookback
         self.num_layers = args.num_layers
         self.num_units = args.num_units
         self.batch_size = args.batch_size
-        self.layers_size = args.layers_size
         self.num_epochs = args.num_epochs
 
 def create_dataset(dataset):

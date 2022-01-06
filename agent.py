@@ -102,18 +102,21 @@ class multiLayer_LSTM():
 
             predicted_stock_price = self.model.predict(X_test)
             predicted_stock_price = self.scaler.inverse_transform(predicted_stock_price)
-            self.plot(i,predicted_stock_price,X_test.shape[0])
+            self.plot(i,predicted_stock_price)
 
 
-    def plot(self,i,predicted_stock_price,steps):
+    def plot(self,i,predicted_stock_price):
         plt.plot(self.dataset.columns[self.train_size+1:],self.dataset_test[i], color = 'red', label = 'Real Stock Price')
-        plt.plot(self.dataset.columns[self.train_size+1:],predicted_stock_price, color = 'blue', label = 'Predicted Stock Price')
-        plt.xticks(np.arange(0,steps,self.selflook_back))
+        plt.plot(self.dataset.columns[self.train_size+1:self.train_size+1+predicted_stock_price.shape[0]],predicted_stock_price, color = 'blue', label = 'Predicted Stock Price')
+        plt.xticks(np.arange(0,predicted_stock_price.shape[0],self.look_back))
         plt.title('Stock Price Prediction')
         plt.xlabel('Time')
         plt.ylabel('Stock Price')
         plt.legend()
-        plt.savefig('output/plot_multiLayer_LSTM%d.png' % i)
+
+        if not os.path.exists('output'):
+             os.makedirs('output')
+        plt.savefig('output/plot_multiLayer_LSTM_%d.png' % i)
 
 
 

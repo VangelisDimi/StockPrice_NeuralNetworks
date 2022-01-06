@@ -29,9 +29,9 @@ class multiLayer_LSTM():
         self.look_back = look_back
         self.dropout_rate = dropout_rate
         
-        self.data_size=self.dataset.shape[1]
+        self.data_size=self.dataset.shape[1]-1
         self.train_size=math.floor(self.data_size*train_size)
-        self.test_size=self.data_size-self.train_size
+        self.test_size=self.data_size-self.train_size-1
 
         self.scaler = MinMaxScaler(feature_range=(0, 1))
 
@@ -63,7 +63,6 @@ class multiLayer_LSTM():
             _dataset = self.dataset.iloc[i, self.train_size+1:].values
             _dataset = np.array([_dataset]).T
             self.dataset_test.append(_dataset)
-
  
         self.model = Sequential()
         #First Layer
@@ -89,17 +88,15 @@ class multiLayer_LSTM():
     def test_predict(self,num_predictions=1):
         #Indicative results for model
         for i in random.sample(range(len(self.dataset)),num_predictions):
-            # dataset_total = pd.concat((self.dataset_train[i], self.dataset_test[i]), axis = 0)
-            # inputs = dataset_total[len(self.dataset_train[i]) - len(self.dataset_test[i]) - self.look_back:].values
-            dataset_total = self.dataset.iloc[i,1:self.data_size+1].values
+            dataset_total = self.dataset.iloc[i,1:].values
             dataset_total= np.array([dataset_total]).T
             inputs = dataset_total[self.train_size - self.test_size - self.look_back:]
 
             inputs = inputs.reshape(-1,1)
             inputs = self.scaler.transform(inputs)
             X_test = []
-            for i in range(self.look_back, self.test_size):
-                X_test.append(inputs[i-self.look_back:i, 0])
+            for y in range(self.look_back, self.test_size):
+                X_test.append(inputs[y-self.look_back:y, 0])
             X_test = np.array(X_test)
             X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
 

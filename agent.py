@@ -98,7 +98,7 @@ class multiLayer_LSTM():
         inputs = self.scaler.transform(inputs)
 
         X_test = []
-        for y in range(self.look_back, self.test_size):
+        for y in range(self.look_back, self.test_size + self.look_back+1):
             X_test.append(inputs[y-self.look_back:y, 0])
         X_test = np.array(X_test)
         X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
@@ -110,7 +110,7 @@ class multiLayer_LSTM():
 
     def plot(self,i,predicted_stock_price,plot_name):
         plt.plot(self.dataset.columns[self.train_size+1:],self.dataset_test[i], color = 'red', label = 'Real Stock Price')
-        plt.plot(self.dataset.columns[self.train_size+1:self.train_size+1+predicted_stock_price.shape[0]],predicted_stock_price, color = 'blue', label = 'Predicted Stock Price')
+        plt.plot(self.dataset.columns[self.train_size+1:],predicted_stock_price, color = 'blue', label = 'Predicted Stock Price')
         plt.title('Stock Price Prediction: '+self.dataset['id'][i])
         plt.xlabel('Time')
         plt.ylabel('Stock Price')

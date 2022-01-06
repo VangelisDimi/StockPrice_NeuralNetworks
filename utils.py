@@ -24,7 +24,7 @@ class ArgumentParser():
         self.output_query_file = args.oq
         self.error_value_as_double = args.mae
         self.number_of_time_series_selected = args.n
-        self.look_back=60
+        self.look_back=10
         self.num_layers = args.num_layers
         self.num_units = args.num_units
         self.batch_size = args.batch_size

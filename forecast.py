@@ -1,8 +1,12 @@
 from agent import multiLayer_LSTM
 from utils import ArgumentParser, create_dataset
 import random
+import os
 
 if __name__ == "__main__":
+    if not os.path.exists('output'):
+             os.makedirs('output')
+
     parser = ArgumentParser()
 
     dataset=create_dataset(parser.dataset)
@@ -12,4 +16,5 @@ if __name__ == "__main__":
 
     num_predictions=1
     for i in random.sample(range(len(dataset)),num_predictions):
-        agent.predict(i)
+        predicted_stock_price=agent.predict(i)
+        agent.plot(i,predicted_stock_price,'output/LSTM_%s.png' % dataset['id'][i])

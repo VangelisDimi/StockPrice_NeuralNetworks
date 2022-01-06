@@ -31,36 +31,38 @@ class multiLayer_LSTM():
         
         self.data_size=self.dataset.shape[1]
         self.train_size=math.floor(self.data_size*train_size)
+        self.test_size=self.data_size-self.train_size
 
         self.scaler = MinMaxScaler(feature_range=(0, 1))
 
         #Create list of training sets
         self.X_train=[]
         self.y_train=[]
+        self.dataset_train=[]
         for i in range(len(self.dataset)):
             # Normalize the dataset
             _dataset = self.dataset.iloc[i, 1:self.train_size+1].values
             _dataset= np.array([_dataset]).T
             _dataset = self.scaler.fit_transform(_dataset)
+            self.dataset_train.append(_dataset)
 
             # Creating a data structure with self.look_back time-steps and 1 output
             X_t = []
             y_t = []
             for i in range(self.look_back,self.train_size):
-                X_t.append(self._dataset[i-self.look_back:i, 0])
-                y_t.append(self._dataset[i, 0])
+                X_t.append(_dataset[i-self.look_back:i, 0])
+                y_t.append(_dataset[i, 0])
             X_t, y_t = np.array(X_t), np.array(y_t)
             X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
             self.X_train.append(X_t)
             self.y_train.append(y_t)
         
         #Create list of testing sets
-        self.X_test=[]
-        self.y_test=[]
+        self.dataset_test=[]
         for i in range(len(self.dataset)):
             _dataset = self.dataset.iloc[i, self.train_size+1:].values
             _dataset = np.array([_dataset]).T
-            self.X_test.append(_dataset)
+            self.dataset_test.append(_dataset)
 
  
         self.model = Sequential()
@@ -71,41 +73,53 @@ class multiLayer_LSTM():
         for i in range(self.num_layers):
             self.model.add(LSTM(units = self.num_units, return_sequences = True))
             self.model.add(Dropout(self.dropout_rate))
+        self.model.add(LSTM(units = self.num_units))
+        self.model.add(Dropout(self.dropout_rate))
         #Output Layer
         self.model.add(Dense(units = 1))
 
-        # Compiling the RNN
+        #Compiling the RNN
         self.model.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
     def fit(self):
-        for i in range(self.X_train):
+        #Fit all datasets to model
+        for i in range(len(self.X_train)):
             self.model.fit(self.X_train[i], self.y_train[i], epochs=self.num_epochs, batch_size=self.batch_size)
 
-    def predict(self):
-        for i in range(random.sample(range(len(self.X_test)), 5)):
-            dataset_total = pd.concat((self.X_train[i], self.X_test[i]), axis = 0)
-            inputs = dataset_total[len(self.X_train[i]) - len(self.X_test[i]) - self.look_back:].values
+    def test_predict(self,num_predictions=1):
+        #Indicative results for model
+        for i in random.sample(range(len(self.dataset)),num_predictions):
+            # dataset_total = pd.concat((self.dataset_train[i], self.dataset_test[i]), axis = 0)
+            # inputs = dataset_total[len(self.dataset_train[i]) - len(self.dataset_test[i]) - self.look_back:].values
+            dataset_total = self.dataset.iloc[i,1:self.data_size+1].values
+            dataset_total= np.array([dataset_total]).T
+            inputs = dataset_total[self.train_size - self.test_size - self.look_back:]
+
             inputs = inputs.reshape(-1,1)
             inputs = self.scaler.transform(inputs)
             X_test = []
-            for i in range(60, 519):
-                X_test.append(inputs[i-60:i, 0])
+            for i in range(self.look_back, self.test_size):
+                X_test.append(inputs[i-self.look_back:i, 0])
             X_test = np.array(X_test)
             X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
 
             predicted_stock_price = self.model.predict(X_test)
             predicted_stock_price = self.scaler.inverse_transform(predicted_stock_price)
+            self.plot(i,predicted_stock_price,X_test.shape[0])
 
 
-    def plot(self,i,):
-        plt.plot(self.dataset.loc[800:, ‘Date’],dataset_test.values, color = ‘red’, label = ‘Real TESLA Stock Price’)
-        plt.plot(self.dataset.loc[800:, ‘Date’],predicted_stock_price, color = ‘blue’, label = ‘Predicted TESLA Stock Price’)
-        plt.xticks(np.arange(0,459,50))
-        plt.title('TESLA Stock Price Prediction')
+    def plot(self,i,predicted_stock_price,steps):
+        plt.plot(self.dataset.columns[self.train_size+1:],self.dataset_test[i], color = 'red', label = 'Real Stock Price')
+        plt.plot(self.dataset.columns[self.train_size+1:],predicted_stock_price, color = 'blue', label = 'Predicted Stock Price')
+        plt.xticks(np.arange(0,steps,self.selflook_back))
+        plt.title('Stock Price Prediction')
         plt.xlabel('Time')
-        plt.ylabel('TESLA Stock Price')
+        plt.ylabel('Stock Price')
         plt.legend()
-        plt.savefig('output/plot_multiLayer_LSTM_i.png')
+        plt.savefig('output/plot_multiLayer_LSTM%d.png' % i)
+
+
+
 
 class LSTM_encoder_decoder():
     def __init__(self, dataset, batch_size, num_epochs, num_layers, num_units, layers_size, dropout_rate=0.2, look_back=1):

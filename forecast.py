@@ -2,6 +2,7 @@ from agent import multiLayer_LSTM
 from utils import ArgumentParser, create_dataset
 import random
 import os
+import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     if not os.path.exists('output'):
@@ -11,12 +12,31 @@ if __name__ == "__main__":
 
     dataset=create_dataset(parser.dataset)
     agent = multiLayer_LSTM(dataset=dataset, batch_size=parser.batch_size, num_epochs=parser.num_epochs, 
-                num_layers=parser.num_layers, num_units=parser.num_units, look_back=parser.look_back)
+                num_layers=parser.num_layers, num_units=parser.num_units, dropout_rate=parser.dropout_rate, look_back=parser.look_back,
+                train_size=parser.train_size)
     agent.fit()
 
-    num_predictions=1
+    num_predictions=parser.number_of_time_series_selected
     for i in random.sample(range(len(dataset)),num_predictions):
+        #With dataset training
         predicted_stock_price=agent.predict(i)
-        agent.plot(i,predicted_stock_price,'output/LSTM_%s.png' % dataset['id'][i])
+
+        #With single time-series training
+        s_dataset=dataset.iloc[[2]]
+        s_dataset.index=[0]
+        agent_single = multiLayer_LSTM(dataset=s_dataset, batch_size=parser.batch_size, num_epochs=parser.num_epochs, 
+                    num_layers=parser.num_layers, num_units=parser.num_units, look_back=parser.look_back)
+        agent_single.fit()
+        predicted_stock_price_s=agent_single.predict(0)
+
+        #Plot
+        plt.plot(agent.dataset.columns[agent.train_size+1:],agent.dataset_test[i], color = 'red', label = 'Real Stock Price')
+        plt.plot(agent.dataset.columns[agent.train_size+1:],predicted_stock_price, color = 'blue', label = 'Predicted Stock Price')
+        plt.plot(agent_single.dataset.columns[agent_single.train_size+1:],predicted_stock_price_s, color = 'green', label = 'Predicted Stock Price (Single)')
+        plt.title('Stock Price Prediction: '+agent.dataset['id'][i])
+        plt.xlabel('Time')
+        plt.ylabel('Stock Price')
+        plt.legend()
+        plt.savefig('output/LSTM_%s.png' % dataset['id'][i])
 
         

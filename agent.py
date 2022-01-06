@@ -108,17 +108,6 @@ class multiLayer_LSTM():
         return predicted_stock_price
 
 
-    def plot(self,i,predicted_stock_price,plot_name):
-        plt.plot(self.dataset.columns[self.train_size+1:],self.dataset_test[i], color = 'red', label = 'Real Stock Price')
-        plt.plot(self.dataset.columns[self.train_size+1:],predicted_stock_price, color = 'blue', label = 'Predicted Stock Price')
-        plt.title('Stock Price Prediction: '+self.dataset['id'][i])
-        plt.xlabel('Time')
-        plt.ylabel('Stock Price')
-        plt.legend()
-
-        plt.savefig(plot_name)
-
-
 
 
 class LSTM_encoder_decoder():

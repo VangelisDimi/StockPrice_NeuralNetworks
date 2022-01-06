@@ -1,4 +1,5 @@
 import argparse
+from google.protobuf.json_format import ParseDict
 from keras.backend import print_tensor
 from keras.utils.generic_utils import default
 import pandas
@@ -17,6 +18,8 @@ class ArgumentParser():
         parser.add_argument('-num_units', type=int, default=50)
         parser.add_argument('-num_epochs', type=int, default=10)
         parser.add_argument('-lookback', type=int, default=30)
+        parser.add_argument('-dropout_rate', type=float, default=0.2)
+        parser.add_argument('-train_size', type=float, default=0.8)
 
         args = parser.parse_args()
         self.dataset = args.d
@@ -30,6 +33,8 @@ class ArgumentParser():
         self.num_units = args.num_units
         self.batch_size = args.batch_size
         self.num_epochs = args.num_epochs
+        self.dropout_rate = args.dropout_rate
+        self.train_size = args.train_size
 
 def create_dataset(dataset):
     #Columns: stock_id,day1,......,dayN

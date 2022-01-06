@@ -54,6 +54,7 @@ class multiLayer_LSTM():
                 y_t.append(_dataset[i, 0])
             X_t, y_t = np.array(X_t), np.array(y_t)
             X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
+            
             self.X_train.append(X_t)
             self.y_train.append(y_t)
         
@@ -63,7 +64,9 @@ class multiLayer_LSTM():
             _dataset = self.dataset.iloc[i, self.train_size+1:].values
             _dataset = np.array([_dataset]).T
             self.dataset_test.append(_dataset)
- 
+
+
+        #Create network
         self.model = Sequential()
         #First Layer
         self.model.add(LSTM(units = self.num_units, return_sequences = True, input_shape = (self.X_train[0].shape[1], 1)))
@@ -85,38 +88,37 @@ class multiLayer_LSTM():
         for i in range(len(self.X_train)):
             self.model.fit(self.X_train[i], self.y_train[i], epochs=self.num_epochs, batch_size=self.batch_size)
 
-    def test_predict(self,num_predictions=1):
-        #Indicative results for model
-        for i in random.sample(range(len(self.dataset)),num_predictions):
-            dataset_total = self.dataset.iloc[i,1:].values
-            dataset_total= np.array([dataset_total]).T
-            inputs = dataset_total[self.train_size - self.test_size - self.look_back:]
+    def predict(self,i):
+        #Predict results for stock
+        dataset_total = self.dataset.iloc[i,1:].values
+        dataset_total= np.array([dataset_total]).T
+        inputs = dataset_total[self.train_size - self.test_size - self.look_back:]
 
-            inputs = inputs.reshape(-1,1)
-            inputs = self.scaler.transform(inputs)
-            X_test = []
-            for y in range(self.look_back, self.test_size):
-                X_test.append(inputs[y-self.look_back:y, 0])
-            X_test = np.array(X_test)
-            X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
+        inputs = inputs.reshape(-1,1)
+        inputs = self.scaler.transform(inputs)
 
-            predicted_stock_price = self.model.predict(X_test)
-            predicted_stock_price = self.scaler.inverse_transform(predicted_stock_price)
-            self.plot(i,predicted_stock_price)
+        X_test = []
+        for y in range(self.look_back, self.test_size):
+            X_test.append(inputs[y-self.look_back:y, 0])
+        X_test = np.array(X_test)
+        X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
+
+        predicted_stock_price = self.model.predict(X_test)
+        predicted_stock_price = self.scaler.inverse_transform(predicted_stock_price)
+        self.plot(i,predicted_stock_price)
 
 
     def plot(self,i,predicted_stock_price):
         plt.plot(self.dataset.columns[self.train_size+1:],self.dataset_test[i], color = 'red', label = 'Real Stock Price')
         plt.plot(self.dataset.columns[self.train_size+1:self.train_size+1+predicted_stock_price.shape[0]],predicted_stock_price, color = 'blue', label = 'Predicted Stock Price')
-        plt.xticks(np.arange(0,predicted_stock_price.shape[0],self.look_back))
-        plt.title('Stock Price Prediction')
+        plt.title('Stock Price Prediction: '+self.dataset['id'][i])
         plt.xlabel('Time')
         plt.ylabel('Stock Price')
         plt.legend()
 
         if not os.path.exists('output'):
              os.makedirs('output')
-        plt.savefig('output/plot_multiLayer_LSTM_%d.png' % i)
+        plt.savefig('output/LSTM_%s.png' % self.dataset['id'][i])
 
 
 

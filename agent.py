@@ -152,10 +152,12 @@ class LSTM_autoencoder():
         #Create list of testing sets
         self.X_test=[]
         self.y_test=[]
+        self.dataset_test=[]
         for i in range(len(self.dataset)):
             # Normalize the dataset
             _dataset = self.dataset.iloc[i, self.train_size+1:].values
             _dataset = np.array([_dataset]).T
+            self.dataset_test.append(_dataset)
             _dataset = self.scaler.transform(_dataset)
 
             X_t = []
@@ -172,7 +174,7 @@ class LSTM_autoencoder():
         #Create network
         self.model = Sequential()
         #First Layer
-        self.model.add(LSTM(units=self.num_units,input_shape=(self.X_train[0].shape[1],self.X_train[0].shape[2])))
+        self.model.add(LSTM(units=self.num_units,input_shape=(self.X_train[0].shape[1],1)))
         self.model.add(Dropout(self.dropout_rate))
         self.model.add(RepeatVector(n=self.X_train[0].shape[1]))
         #Add layers
@@ -180,7 +182,7 @@ class LSTM_autoencoder():
             self.model.add(LSTM(units = self.num_units, return_sequences = True))
             self.model.add(Dropout(self.dropout_rate))
         #Output Layer
-        self.model.add(TimeDistributed(Dense(units=self.X_train[0].shape[2])))
+        self.model.add(TimeDistributed(Dense(units=1)))
         #Compile
         self.model.compile(loss='mae', optimizer='adam')
 
@@ -203,7 +205,7 @@ class LSTM_autoencoder():
         _dataset = np.array([_dataset]).T
         test_score_df['close'] = _dataset[self.window:]
 
-        return test_score_df
+        return test_score_df,X_pred
 
 
 class CNN_autoencoder():

@@ -3,6 +3,7 @@ from utils import ArgumentParser, create_dataset
 import os
 import random
 import matplotlib.pyplot as plt
+import numpy as np
 
 if __name__ == "__main__":
     if not os.path.exists('output'):
@@ -19,13 +20,17 @@ if __name__ == "__main__":
     num_predictions=parser.number_of_time_series_selected
     for i in random.sample(range(len(dataset)),num_predictions):
         #With dataset training
-        test_score_df=agent.predict(i)
+        test_score_df,X_pred=agent.predict(i)
 
         #Plot
-        plt.plot(test_score_df.index,test_score_df['loss'], color = 'blue', label = 'loss')
-        plt.plot(test_score_df.index,test_score_df['threshold'], color = 'orange', label = 'threshold')
+        anomalies = test_score_df[test_score_df.anomaly == True]
+
+        plt.plot(test_score_df.index,agent.dataset_test[i][agent.window:], color = 'green', label = 'stock price')
+        plt.plot(test_score_df.index,X_pred[:,0], color = 'blue', label = 'predicted stock price')
+        plt.scatter(anomalies.index,anomalies['anomaly'], color = 'red', label = 'anomaly')
+
         plt.title('Anomaly detection: '+agent.dataset['id'][i])
         plt.xlabel('Time')
-        plt.ylabel('Loss')
+        plt.ylabel('Stock Price')
         plt.legend()
         plt.savefig('output/LSTM_autoencoder_%s.png' % dataset['id'][i])

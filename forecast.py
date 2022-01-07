@@ -38,5 +38,4 @@ if __name__ == "__main__":
         plt.ylabel('Stock Price')
         plt.legend()
         plt.savefig('output/LSTM_multilayer_%s.png' % dataset['id'][i])
-
-        
+        plt.clf()

@@ -152,12 +152,10 @@ class LSTM_autoencoder():
         #Create list of testing sets
         self.X_test=[]
         self.y_test=[]
-        self.dataset_test=[]
         for i in range(len(self.dataset)):
             # Normalize the dataset
             _dataset = self.dataset.iloc[i, self.train_size+1:].values
             _dataset = np.array([_dataset]).T
-            self.dataset_test.append(_dataset)
             _dataset = self.scaler.transform(_dataset)
 
             X_t = []
@@ -204,8 +202,9 @@ class LSTM_autoencoder():
         _dataset = self.dataset.iloc[i, self.train_size+1:].values
         _dataset = np.array([_dataset]).T
         test_score_df['close'] = _dataset[self.window:]
+        test_score_df['predicted'] = X_pred[:,0]
 
-        return test_score_df,X_pred
+        return test_score_df
 
 
 class CNN_autoencoder():

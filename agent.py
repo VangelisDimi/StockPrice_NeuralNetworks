@@ -3,16 +3,13 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 import math
-from keras.models import Sequential
+from keras.models import Sequential,Model
 from keras.layers import Dense
-from keras.layers import LSTM,RepeatVector,TimeDistributed
+from keras.layers import LSTM,RepeatVector,TimeDistributed,Input,Conv1D,UpSampling1D,MaxPooling1D,BatchNormalization
 from keras.layers import Dropout
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import mean_squared_error
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 
@@ -33,6 +30,7 @@ class multiLayer_LSTM():
 
         self.scaler = MinMaxScaler(feature_range=(0, 1))
 
+        #Format data
         #Create list of training sets
         self.X_train=[]
         self.y_train=[]
@@ -44,12 +42,11 @@ class multiLayer_LSTM():
             _dataset = self.scaler.fit_transform(_dataset)
             self.dataset_train.append(_dataset)
 
-            # Creating a data structure with self.window time-steps and 1 output
             X_t = []
             y_t = []
-            for i in range(self.window,self.train_size):
-                X_t.append(_dataset[i-self.window:i, 0])
-                y_t.append(_dataset[i, 0])
+            for j in range(self.window,self.train_size):
+                X_t.append(_dataset[j-self.window:j, 0])
+                y_t.append(_dataset[j, 0])
             X_t, y_t = np.array(X_t), np.array(y_t)
             X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
             
@@ -131,6 +128,7 @@ class LSTM_autoencoder():
             _dataset= np.array([_dataset]).T
             self.scaler = self.scaler.fit(_dataset)
 
+        #Format data
         #Create list of training sets
         self.X_train=[]
         self.y_train=[]
@@ -140,12 +138,11 @@ class LSTM_autoencoder():
             _dataset= np.array([_dataset]).T
             _dataset = self.scaler.transform(_dataset)
             
-            # Creating a data structure with self.window time-steps and 1 output
             X_t = []
             y_t = []
-            for y in range(self.train_size - self.window):
-                X_t.append(_dataset[y:(y + self.window),0])
-                y_t.append(_dataset[y + self.window, 0])
+            for j in range(self.train_size - self.window):
+                X_t.append(_dataset[j:(j + self.window),0])
+                y_t.append(_dataset[j + self.window, 0])
             X_t, y_t = np.array(X_t), np.array(y_t)
             X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
 
@@ -156,16 +153,16 @@ class LSTM_autoencoder():
         self.X_test=[]
         self.y_test=[]
         for i in range(len(self.dataset)):
+            # Normalize the dataset
             _dataset = self.dataset.iloc[i, self.train_size+1:].values
             _dataset = np.array([_dataset]).T
             _dataset = self.scaler.transform(_dataset)
 
-            # Creating a data structure with self.window time-steps and 1 output
             X_t = []
             y_t = []
-            for y in range(self.test_size- self.window):
-                X_t.append(_dataset[y:(y + self.window),0])
-                y_t.append(_dataset[y + self.window, 0])
+            for j in range(self.test_size- self.window):
+                X_t.append(_dataset[j:(j + self.window),0])
+                y_t.append(_dataset[j + self.window, 0])
             X_t, y_t = np.array(X_t), np.array(y_t)
             X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
 
@@ -191,7 +188,7 @@ class LSTM_autoencoder():
         #Fit all datasets to model
         for i in range(len(self.X_train)):
             print("Fitting: ",i+1,"/",len(self.X_train))
-            self.model.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.batch_size,validation_split=0.1,shuffle=False)
+            self.model.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.batch_size)
     
     def predict(self,i):
         X_pred = self.model.predict(self.X_test[i])
@@ -210,28 +207,69 @@ class LSTM_autoencoder():
 
 
 class CNN_autoencoder():
-    def __init__(self, dataset, batch_size, num_epochs, num_layers, num_units, layers_size, dropout_rate=0.2, look_back=1):
-
+    def __init__(self, dataset, latent_dimension=3 ,batch_size=3, num_epochs=10, num_layers=2, num_units=50, window=10, train_size=0.8):
+        #Initialize network
         self.dataset = dataset
         self.num_units = num_units
         self.batch_size = batch_size
         self.num_epochs = num_epochs
         self.num_layers = num_layers
-        self.layers_size = layers_size
-        self.look_back = look_back
+        self.window = window
+        self.latent_dimension = latent_dimension
 
-        # normalize the dataset
+        self.data_size=self.dataset.shape[1]-1
+        self.train_size=math.floor(self.data_size*train_size)
+        self.test_size=self.data_size-self.train_size
+
         self.scaler = MinMaxScaler(feature_range=(0, 1))
-        self.dataset = self.scaler.fit_transform(self.dataset)
 
-        self.train_X, self.train_Y, self.test_X, self.test_Y = train_test_split(self.dataset)
+        #Format data
+        #Create list of training sets
+        self.X_train=[]
+        self.y_train=[]
+        for i in range(len(self.dataset)):
+            # Normalize the dataset
+            _dataset = self.dataset.iloc[i, 1:self.train_size+1].values
+            _dataset= np.array([_dataset]).T
+            _dataset = self.scaler.fit_transform(_dataset)
+            
+            X_t = []
+            for j in range(self.window,self.train_size):
+                y_t.append(_dataset[j + self.window, 0])
+            X_t, y_t = np.array(X_t), np.array(y_t)
+            X_t = np.array(X_t)
+            X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
 
-        # create and fit the LSTM network
-        self.model = Sequential()
-        self.model.add(LSTM(num_layers, input_shape=layers_size))
-        self.model.add(Dense(1))
-        self.model.add(Dropout(rate=dropout_rate, input_shape=layers_size))
-        self.model.compile(loss='mean_squared_error', optimizer='adam')
+            self.X_train.append(X_t)
+            self.y_train.append(y_t)
+
+        #Create list of testing sets
+        self.X_test=[]
+        self.y_test=[]
+        for i in range(len(self.dataset)):
+            # Normalize the dataset
+            _dataset = self.dataset.iloc[i, self.train_size+1:].values
+            _dataset = np.array([_dataset]).T
+            _dataset = self.scaler.transform(_dataset)
+
+            X_t = []
+            for j in range(self.window,self.test_size):
+                y_t.append(_dataset[j + self.window, 0])
+            X_t, y_t = np.array(X_t), np.array(y_t)
+            X_t = np.array(X_t)
+            X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
+
+            self.X_test.append(X_t)
+            self.y_test.append(y_t)
+
+        #Create network
+        
 
     def fit(self):
-        self.model.fit(self.train_X, self.train_Y, epochs=self.num_epochs, batch_size=self.batch_size, verbose=2)
+        #Fit all datasets to model
+        for i in range(len(self.X_train)):
+            print("Fitting: ",i+1,"/",len(self.X_train))
+            self.model.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.num_epochs)
+
+    def predict(self,i):
+        return

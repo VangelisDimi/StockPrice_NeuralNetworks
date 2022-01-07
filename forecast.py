@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     dataset=create_dataset(parser.dataset)
     agent = multiLayer_LSTM(dataset=dataset, batch_size=parser.batch_size, num_epochs=parser.num_epochs, 
-                num_layers=parser.num_layers, num_units=parser.num_units, dropout_rate=parser.dropout_rate, look_back=parser.look_back,
+                num_layers=parser.num_layers, num_units=parser.num_units, dropout_rate=parser.dropout_rate, window=parser.window,
                 train_size=parser.train_size)
     agent.fit()
 
@@ -25,7 +25,7 @@ if __name__ == "__main__":
         s_dataset=dataset.iloc[[2]]
         s_dataset.index=[0]
         agent_single = multiLayer_LSTM(dataset=s_dataset, batch_size=parser.batch_size, num_epochs=parser.num_epochs, 
-                    num_layers=parser.num_layers, num_units=parser.num_units, look_back=parser.look_back)
+                    num_layers=parser.num_layers, num_units=parser.num_units, window=parser.window)
         agent_single.fit()
         predicted_stock_price_s=agent_single.predict(0)
 

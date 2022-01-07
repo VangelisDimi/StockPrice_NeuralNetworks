@@ -17,7 +17,7 @@ class ArgumentParser():
         parser.add_argument('-num_layers', type=int, default=4)
         parser.add_argument('-num_units', type=int, default=50)
         parser.add_argument('-num_epochs', type=int, default=10)
-        parser.add_argument('-lookback', type=int, default=30)
+        parser.add_argument('-window', type=int, default=30)
         parser.add_argument('-dropout_rate', type=float, default=0.2)
         parser.add_argument('-train_size', type=float, default=0.8)
 
@@ -28,7 +28,7 @@ class ArgumentParser():
         self.output_query_file = args.oq
         self.error_value_as_double = args.mae
         self.number_of_time_series_selected = args.n
-        self.look_back=args.lookback
+        self.window=args.window
         self.num_layers = args.num_layers
         self.num_units = args.num_units
         self.batch_size = args.batch_size

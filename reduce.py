@@ -5,6 +5,8 @@ import os
 if __name__ == "__main__":
     if not os.path.exists('output'):
              os.makedirs('output')
+    if not os.path.exists('models'):
+            os.makedirs('models')
 
     parser = ArgumentParser()
     

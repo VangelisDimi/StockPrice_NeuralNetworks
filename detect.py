@@ -25,10 +25,8 @@ if __name__ == "__main__":
         #Plot
         anomalies = test_score_df[test_score_df.anomaly == True]
 
-        plt.plot(test_score_df.index,test_score_df['close'], color = 'green', label = 'stock price')
-        plt.plot(test_score_df.index,test_score_df['predicted'], color = 'blue', label = 'predicted stock price')
+        plt.plot(test_score_df.index,test_score_df['close'], color = 'blue', label = 'stock price')
         plt.scatter(anomalies.index,anomalies['close'], color = 'red', label = 'anomaly')
-
         plt.title('Anomaly detection: '+agent.dataset['id'][i])
         plt.xlabel('Time')
         plt.ylabel('Stock Price')

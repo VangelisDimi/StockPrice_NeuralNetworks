@@ -15,7 +15,6 @@ from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
-np.random.seed(21)
 
 class multiLayer_LSTM():
     def __init__(self, dataset, batch_size=3, num_epochs=10, num_layers=3, num_units=50, dropout_rate=0.2, window=60, train_size = 0.8):
@@ -236,37 +235,3 @@ class CNN_autoencoder():
 
     def fit(self):
         self.model.fit(self.train_X, self.train_Y, epochs=self.num_epochs, batch_size=self.batch_size, verbose=2)
-
-    def score(self):
-        # make predictions
-        self.pred_train_X = self.model.predict(self.train_X)
-        self.pred_test_X = self.model.predict(self.test_X)
-
-        # invert predictions
-        self.pred_train_X = self.scaler.inverse_transform(self.pred_train_X)
-        train_Y = self.scaler.inverse_transform([self.train_Y])
-        self.pred_test_X = self.scaler.inverse_transform(self.pred_test_X)
-        test_Y = self.scaler.inverse_transform([self.test_Y])
-
-        # calculate root mean squared error
-        train_score = math.sqrt(mean_squared_error(train_Y[0], self.pred_train_X[:,0]))
-        print('Train Score: %.2f RMSE' % (train_score))
-        test_score = math.sqrt(mean_squared_error(test_Y[0], self.pred_test_X[:,0]))
-        print('Test Score: %.2f RMSE' % (test_score))
-
-    def plot(self):
-        # shift train predictions for plotting
-        train_plot = numpy.empty_like(self.dataset)
-        train_plot[:, :] = numpy.nan
-        train_plot[self.look_back:len(self.pred_train_X)+self.look_back, :] = self.pred_train_X
-
-        # shift test predictions for plotting
-        test_plot = numpy.empty_like(self.dataset)
-        test_plot[:, :] = numpy.nan
-        test_plot[len(self.pred_train_X)+(self.look_back*2)+1:len(self.dataset)-1, :] = self.pred_test_X
-
-        # plot baseline and predictions
-        plt.plot(self.scaler.inverse_transform(self.dataset))
-        plt.plot(train_plot)
-        plt.plot(test_plot)
-        plt.show()

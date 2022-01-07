@@ -1,4 +1,3 @@
-from scipy.sparse import data
 from agent import LSTM_autoencoder
 from utils import ArgumentParser, create_dataset
 import os

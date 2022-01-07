@@ -234,10 +234,11 @@ class CNN_autoencoder():
             _dataset = self.scaler.fit_transform(_dataset)
             
             X_t = []
+            y_t = []
             for j in range(self.window,self.train_size):
-                y_t.append(_dataset[j + self.window, 0])
+                X_t.append(_dataset[j-self.window:j, 0])
+                y_t.append(_dataset[j, 0])
             X_t, y_t = np.array(X_t), np.array(y_t)
-            X_t = np.array(X_t)
             X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
 
             self.X_train.append(X_t)
@@ -250,13 +251,14 @@ class CNN_autoencoder():
             # Normalize the dataset
             _dataset = self.dataset.iloc[i, self.train_size+1:].values
             _dataset = np.array([_dataset]).T
-            _dataset = self.scaler.transform(_dataset)
+            _dataset = self.scaler.fit_transform(_dataset)
 
             X_t = []
+            y_t = []
             for j in range(self.window,self.test_size):
-                y_t.append(_dataset[j + self.window, 0])
+                X_t.append(_dataset[j-self.window:j, 0])
+                y_t.append(_dataset[j, 0])
             X_t, y_t = np.array(X_t), np.array(y_t)
-            X_t = np.array(X_t)
             X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
 
             self.X_test.append(X_t)

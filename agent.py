@@ -1,10 +1,13 @@
-#Supress cuda warnings on non-nvidia computers
+#Supress unrelated warnings
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+import absl.logging
+absl.logging.set_verbosity(absl.logging.ERROR)
 
 import numpy as np
 import pandas as pd
 import math
+from tensorflow import keras
 from keras.models import Sequential,Model
 from keras.layers import Dense
 from keras.layers import LSTM,RepeatVector,TimeDistributed,Input,Conv1D,UpSampling1D,MaxPooling1D,BatchNormalization
@@ -101,6 +104,13 @@ class multiLayer_LSTM():
         predicted_stock_price = self.model.predict(X_test)
         predicted_stock_price = self.scaler.inverse_transform(predicted_stock_price)
         return predicted_stock_price
+    
+    def save(self):
+        self.model.save('models/lstm_multilayer')
+
+    def open(self):
+        self.model = keras.models.load_model('models/lstm_multilayer')
+
 
 
 class LSTM_autoencoder():
@@ -203,6 +213,12 @@ class LSTM_autoencoder():
 
         return test_score_df
 
+    def save(self):
+        self.model.save('models/lstm_autoencoder')
+    
+    def open(self):
+        self.model = keras.models.load_model('models/lstm_autoencoder')
+
 
 class CNN_autoencoder():
     def __init__(self, dataset, batch_size=3, num_epochs=10, window=10, train_size=0.8):
@@ -294,3 +310,9 @@ class CNN_autoencoder():
         test_score_df['close'] = _dataset[self.window:]
 
         return test_score_df
+    
+    def save(self):
+        self.model.save('models/cnn_autoencoder')
+    
+    def open(self):
+        self.model = keras.models.load_model('models/cnn_autoencoder')

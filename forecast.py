@@ -7,14 +7,20 @@ import matplotlib.pyplot as plt
 if __name__ == "__main__":
     if not os.path.exists('output'):
              os.makedirs('output')
+    if not os.path.exists('models'):
+            os.makedirs('models')
 
     parser = ArgumentParser()
-
+    
     dataset=create_dataset(parser.dataset)
     agent = multiLayer_LSTM(dataset=dataset, batch_size=parser.batch_size, num_epochs=parser.num_epochs, 
                 num_layers=parser.num_layers, num_units=parser.num_units, dropout_rate=parser.dropout_rate, window=parser.window,
                 train_size=parser.train_size)
-    agent.fit()
+    if parser.train:
+        agent.fit()
+        agent.save()
+    else:
+        agent.open()
 
     num_predictions=parser.number_of_time_series_selected
     for i in random.sample(range(len(dataset)),num_predictions):

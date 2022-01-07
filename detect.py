@@ -14,7 +14,11 @@ if __name__ == "__main__":
     agent = LSTM_autoencoder(dataset=dataset, mae=parser.error_value_as_double, batch_size=parser.batch_size, num_epochs=parser.num_epochs, 
                 num_layers=parser.num_layers, num_units=parser.num_units, dropout_rate=parser.dropout_rate, window=parser.window,
                 train_size=parser.train_size)
-    agent.fit()
+    if parser.train:
+        agent.fit()
+        agent.save()
+    else:
+        agent.open()
 
 
     num_predictions=parser.number_of_time_series_selected

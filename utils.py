@@ -17,6 +17,7 @@ class ArgumentParser():
         parser.add_argument('-window', type=int, default=30)
         parser.add_argument('-dropout_rate', type=float, default=0.2)
         parser.add_argument('-train_size', type=float, default=0.8)
+        parser.add_argument('--train', action='store_true')
 
         args = parser.parse_args()
         self.dataset = args.d
@@ -32,6 +33,7 @@ class ArgumentParser():
         self.num_epochs = args.num_epochs
         self.dropout_rate = args.dropout_rate
         self.train_size = args.train_size
+        self.train = args.train
 
 def create_dataset(dataset):
     #Columns: stock_id,day1,......,dayN

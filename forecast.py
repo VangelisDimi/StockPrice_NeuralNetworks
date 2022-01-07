@@ -37,6 +37,6 @@ if __name__ == "__main__":
         plt.xlabel('Time')
         plt.ylabel('Stock Price')
         plt.legend()
-        plt.savefig('output/LSTM_%s.png' % dataset['id'][i])
+        plt.savefig('output/LSTM_multilayer_%s.png' % dataset['id'][i])
 
         

@@ -12,7 +12,7 @@ class ArgumentParser():
         parser.add_argument('-q', type=str, default=None)
         parser.add_argument('-od', type=str, default="output_dataset.pkl")
         parser.add_argument('-oq', type=str, default="output_query_file.pkl")
-        parser.add_argument('-mae', type=float, default=None)
+        parser.add_argument('-mae', type=float, default=0.65)
         parser.add_argument('-batch_size', type=int, default=3)
         parser.add_argument('-num_layers', type=int, default=4)
         parser.add_argument('-num_units', type=int, default=50)

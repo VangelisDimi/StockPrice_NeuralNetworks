@@ -30,7 +30,7 @@ class multiLayer_LSTM():
         
         self.data_size=self.dataset.shape[1]-1
         self.train_size=math.floor(self.data_size*train_size)
-        self.test_size=self.data_size-self.train_size-1
+        self.test_size=self.data_size-self.train_size
 
         self.scaler = MinMaxScaler(feature_range=(0, 1))
 
@@ -98,7 +98,7 @@ class multiLayer_LSTM():
         inputs = self.scaler.transform(inputs)
 
         X_test = []
-        for y in range(self.window, self.test_size + self.window+1):
+        for y in range(self.window, self.test_size + self.window):
             X_test.append(inputs[y-self.window:y, 0])
         X_test = np.array(X_test)
         X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
@@ -124,9 +124,14 @@ class LSTM_autoencoder():
 
         self.data_size=self.dataset.shape[1]-1
         self.train_size=math.floor(self.data_size*train_size)
-        self.test_size=self.data_size-self.train_size-1
+        self.test_size=self.data_size-self.train_size
 
+        #Create and fit scaler
         self.scaler = StandardScaler()
+        for i in range(len(self.dataset)):
+            _dataset = self.dataset.iloc[i, 1:self.train_size+1].values
+            _dataset= np.array([_dataset]).T
+            self.scaler = self.scaler.fit(_dataset)
 
         #Create list of training sets
         self.X_train=[]
@@ -140,10 +145,11 @@ class LSTM_autoencoder():
             # Creating a data structure with self.window time-steps and 1 output
             X_t = []
             y_t = []
-            for i in range(len(self.dataset) - self.window):
-                X_t.append(_dataset.iloc[i:(i + self.window)].values)
-                y_t.append(_dataset[i + self.window, 0])
+            for y in range(self.train_size - self.window):
+                X_t.append(_dataset[y:(y + self.window),0])
+                y_t.append(_dataset[y + self.window, 0])
             X_t, y_t = np.array(X_t), np.array(y_t)
+            X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
 
             self.X_train.append(X_t)
             self.y_train.append(y_t)
@@ -151,20 +157,19 @@ class LSTM_autoencoder():
         #Create list of testing sets
         self.X_test=[]
         self.y_test=[]
-        self.dataset_test=[]
         for i in range(len(self.dataset)):
             _dataset = self.dataset.iloc[i, self.train_size+1:].values
             _dataset = np.array([_dataset]).T
-            self.dataset_test.append(_dataset)
             _dataset = self.scaler.transform(_dataset)
 
             # Creating a data structure with self.window time-steps and 1 output
             X_t = []
             y_t = []
-            for i in range(len(self.dataset) - self.window):
-                X_t.append(_dataset.iloc[i:(i + self.window)].values)
-                y_t.append(_dataset[i + self.window, 0])
+            for y in range(self.test_size- self.window):
+                X_t.append(_dataset[y:(y + self.window),0])
+                y_t.append(_dataset[y + self.window, 0])
             X_t, y_t = np.array(X_t), np.array(y_t)
+            X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
 
             self.X_test.append(X_t)
             self.y_test.append(y_t)
@@ -194,11 +199,16 @@ class LSTM_autoencoder():
         X_pred = self.model.predict(self.X_test[i])
         test_mae_loss = np.mean(np.abs(X_pred - self.X_test[i]), axis=1)
 
-        test_score_df = pd.DataFrame(index=self.dataset_test[self.mae:].index)
+        test_score_df = pd.DataFrame(index=self.dataset.columns[self.train_size+1+self.window:])
         test_score_df['loss'] = test_mae_loss
         test_score_df['threshold'] = self.mae
         test_score_df['anomaly'] = test_score_df.loss > test_score_df.threshold
-        test_score_df['close'] = self.dataset_test[self.mae:]
+
+        _dataset = self.dataset.iloc[i, self.train_size+1:].values
+        _dataset = np.array([_dataset]).T
+        test_score_df['close'] = _dataset[self.window:]
+
+        return test_score_df
 
 
 class CNN_autoencoder():

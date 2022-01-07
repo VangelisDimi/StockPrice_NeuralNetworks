@@ -105,11 +105,11 @@ class multiLayer_LSTM():
         predicted_stock_price = self.scaler.inverse_transform(predicted_stock_price)
         return predicted_stock_price
     
-    def save(self):
-        self.model.save('models/lstm_multilayer')
-
-    def open(self):
-        self.model = keras.models.load_model('models/lstm_multilayer')
+    def save(self,model_path):
+        self.model.save(model_path)
+    
+    def open(self,model_path):
+        self.model = keras.models.load_model(model_path)
 
 
 
@@ -213,11 +213,11 @@ class LSTM_autoencoder():
 
         return test_score_df
 
-    def save(self):
-        self.model.save('models/lstm_autoencoder')
+    def save(self,model_path):
+        self.model.save(model_path)
     
-    def open(self):
-        self.model = keras.models.load_model('models/lstm_autoencoder')
+    def open(self,model_path):
+        self.model = keras.models.load_model(model_path)
 
 
 class CNN_autoencoder():
@@ -311,8 +311,8 @@ class CNN_autoencoder():
 
         return test_score_df
     
-    def save(self):
-        self.model.save('models/cnn_autoencoder')
+    def save(self,model_path):
+        self.model.save(model_path)
     
-    def open(self):
-        self.model = keras.models.load_model('models/cnn_autoencoder')
+    def open(self,model_path):
+        self.model = keras.models.load_model(model_path)

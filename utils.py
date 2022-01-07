@@ -6,7 +6,7 @@ class ArgumentParser():
         parser = argparse.ArgumentParser()
         parser.add_argument('-d', type=str)
         parser.add_argument('-n', type=int, default=10)
-        parser.add_argument('-q', type=str, default=None)
+        parser.add_argument('-q', type=str)
         parser.add_argument('-od', type=str, default="output_dataset.csv")
         parser.add_argument('-oq', type=str, default="output_query_file.csv")
         parser.add_argument('-mae', type=float, default=0.65)
@@ -18,6 +18,7 @@ class ArgumentParser():
         parser.add_argument('-dropout_rate', type=float, default=0.2)
         parser.add_argument('-train_size', type=float, default=0.8)
         parser.add_argument('--train', action='store_true')
+        parser.add_argument('-model_name', type=str, default='model')
 
         args = parser.parse_args()
         self.dataset = args.d
@@ -34,6 +35,7 @@ class ArgumentParser():
         self.dropout_rate = args.dropout_rate
         self.train_size = args.train_size
         self.train = args.train
+        self.model_name = args.model_name
 
 def create_dataset(dataset):
     #Columns: stock_id,day1,......,dayN

@@ -18,9 +18,9 @@ if __name__ == "__main__":
                 train_size=parser.train_size)
     if parser.train:
         agent.fit()
-        agent.save()
+        agent.save('models/lstm_multilayer_'+parser.model_name)
     else:
-        agent.open()
+        agent.open('models/lstm_multilayer_'+parser.model_name)
 
     num_predictions=parser.number_of_time_series_selected
     for i in random.sample(range(len(dataset)),num_predictions):

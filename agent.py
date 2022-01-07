@@ -78,8 +78,7 @@ class multiLayer_LSTM():
         self.model.add(Dropout(self.dropout_rate))
         #Output Layer
         self.model.add(Dense(units = 1))
-
-        #Compiling the RNN
+        #Compile
         self.model.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
     def fit(self):
@@ -111,7 +110,7 @@ class multiLayer_LSTM():
 
 
 class LSTM_autoencoder():
-    def __init__(self, dataset, mae, batch_size, num_epochs, num_layers, num_units, dropout_rate=0.2, window=1, train_size = 0.8):
+    def __init__(self, dataset, mae=0.65, batch_size=3, num_epochs=10, num_layers=2, num_units=50, dropout_rate=0.2, window=60, train_size = 0.8):
         #Initialize network
         self.dataset = dataset
         self.num_units = num_units

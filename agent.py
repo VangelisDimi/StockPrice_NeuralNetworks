@@ -221,12 +221,13 @@ class LSTM_autoencoder():
 
 
 class CNN_autoencoder():
-    def __init__(self, dataset, batch_size=3, num_epochs=10, window=10, train_size=0.8):
+    def __init__(self, dataset, latent_dim=3, batch_size=3, num_epochs=10, window=10, train_size=0.8):
         #Initialize network
         self.dataset = dataset
         self.batch_size = batch_size
         self.num_epochs = num_epochs
         self.window = window
+        self.latent_dim = latent_dim
 
         self.data_size=self.dataset.shape[1]-1
         self.train_size=math.floor(self.data_size*train_size)
@@ -250,7 +251,7 @@ class CNN_autoencoder():
                 X_t.append(_dataset[j-self.window:j, 0])
                 y_t.append(_dataset[j, 0])
             X_t, y_t = np.array(X_t), np.array(y_t)
-            #X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
+            X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
 
             self.X_train.append(X_t.astype('float32'))
             self.y_train.append(y_t.astype('float32'))
@@ -298,18 +299,9 @@ class CNN_autoencoder():
             print("Fitting: ",i+1,"/",len(self.X_train))
             self.model.fit(self.X_train[i], self.X_train[i],epochs=self.num_epochs,batch_size=self.batch_size)
 
-    def predict(self,i):
-        X_pred = self.model.predict(self.X_test[i])
-        test_bin_loss = np.mean(np.abs(X_pred - self.X_test[i]), axis=1)
+    def autoencode_dataset(self,dataset):
 
-        test_score_df = pd.DataFrame(index=self.dataset.columns[self.train_size+1+self.window:])
-        test_score_df['loss'] = test_bin_loss
-
-        _dataset = self.dataset.iloc[i, self.train_size+1:].values
-        _dataset = np.array([_dataset]).T
-        test_score_df['close'] = _dataset[self.window:]
-
-        return test_score_df
+        return
     
     def save(self,model_path):
         self.model.save(model_path)

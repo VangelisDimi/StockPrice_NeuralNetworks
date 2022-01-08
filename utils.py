@@ -14,9 +14,10 @@ class ArgumentParser():
         parser.add_argument('-num_layers', type=int, default=1)
         parser.add_argument('-num_units', type=int, default=50)
         parser.add_argument('-num_epochs', type=int, default=10)
-        parser.add_argument('-window', type=int, default=30)
+        parser.add_argument('-window', type=int, default=10)
         parser.add_argument('-dropout_rate', type=float, default=0.2)
         parser.add_argument('-train_size', type=float, default=0.8)
+        parser.add_argument('-latent_dim', type=int, default=3)
         parser.add_argument('--train', action='store_true')
         parser.add_argument('-model_name', type=str, default='model')
 
@@ -34,6 +35,7 @@ class ArgumentParser():
         self.num_epochs = args.num_epochs
         self.dropout_rate = args.dropout_rate
         self.train_size = args.train_size
+        self.latent_dim = args.latent_dim
         self.train = args.train
         self.model_name = args.model_name
 

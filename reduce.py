@@ -1,5 +1,6 @@
 from utils import ArgumentParser, create_dataset
 from agent import CNN_autoencoder
+import pandas as pd
 import os
 
 if __name__ == "__main__":
@@ -12,6 +13,11 @@ if __name__ == "__main__":
     
     dataset_i=create_dataset(parser.dataset)
     dataset_q=create_dataset(parser.queryset)
-
-    agent = CNN_autoencoder(dataset=dataset_i, latent_dim=parser.latent_dim, batch_size=parser.batch_size, num_epochs=parser.num_epochs, window=parser.window)
-    agent.fit()
+    dataset_joined=pd.concat([dataset_i, dataset_q], ignore_index=True)
+    
+    agent = CNN_autoencoder(dataset=dataset_joined, latent_dim=parser.latent_dim, batch_size=parser.batch_size, num_epochs=parser.num_epochs, window=parser.window)
+    if parser.train:
+        agent.fit()
+        agent.save('models/cnn_autoencoder_'+parser.model_name)
+    else:
+        agent.open('models/cnn_autoencoder_'+parser.model_name)

@@ -41,9 +41,8 @@ class ArgumentParser():
 
 def create_dataset(dataset):
     #Columns: stock_id,day1,......,dayN
-    df = pandas.read_csv(dataset,'\t')
+    df = pandas.read_csv(dataset,'\t', header=None)
     column_names=['id']
     for i in range(1,df.shape[1]): column_names.append(i)
     df=df.set_axis(column_names, axis='columns', inplace=False)
-
     return df

@@ -10,7 +10,7 @@ import math
 from tensorflow import keras
 from keras.models import Sequential,Model
 from keras.layers import Dense
-from keras.layers import LSTM,RepeatVector,TimeDistributed,Input,Conv1D,UpSampling1D,MaxPooling1D,BatchNormalization
+from keras.layers import LSTM,RepeatVector,TimeDistributed,Input,Conv1D,UpSampling1D,MaxPooling1D
 from keras.layers import Dropout
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
@@ -277,30 +277,34 @@ class CNN_autoencoder():
             self.y_test.append(y_t.astype('float32'))
 
         #Create network
-        input_window = Input(shape=(self.window,1))
-        x = Conv1D(16, 3, activation="relu", padding="same")(input_window) # 10 dims
-        x = MaxPooling1D(2, padding="same")(x) # 5 dims
-        x = Conv1D(1, 3, activation="relu", padding="same")(x) # 5 dims
-        encoded = MaxPooling1D(2, padding="same")(x) # 3 dims
-        self.encoder = Model(input_window, encoded)
-        
-        x = Conv1D(1, 3, activation="relu", padding="same")(encoded) # 3 dims
-        x = UpSampling1D(2)(x) # 6 dims
-        x = Conv1D(16, 2, activation='relu')(x) # 5 dims
-        x = UpSampling1D(2)(x) # 10 dims
-        decoded = Conv1D(1, 3, activation='sigmoid', padding='same')(x) # 10 dims
-        self.model = Model(input_window, decoded)
-
+        #Input
+        input = Input(shape=(self.window,1))
+        # Encoder
+        conv1_1 = Conv1D(16, 3, activation="relu", padding="same")(input)
+        pool1 = MaxPooling1D(2, padding="same")(conv1_1)
+        conv1_2 = Conv1D(1, 3, activation="relu", padding="same")(pool1)
+        encoded = MaxPooling1D(2, padding="same")(conv1_2)
+        # Decoder
+        conv2_1 = Conv1D(1, 3, activation="relu", padding="same")(encoded)
+        up1 = UpSampling1D(2)(conv2_1)
+        conv2_2 = Conv1D(16, 2, activation='relu')(up1)
+        up2 = UpSampling1D(2)(conv2_2)
+        #Output
+        output = Conv1D(1, 3, activation='sigmoid', padding='same')(up2)
+        #Compile
+        self.model = Model(input, output)
         self.model.compile(optimizer='adam', loss='binary_crossentropy')
 
     def fit(self):
         #Fit all datasets to model
         for i in range(len(self.X_train)):
             print("Fitting: ",i+1,"/",len(self.X_train))
-            self.model.fit(self.X_train[i], self.X_train[i],epochs=self.num_epochs,batch_size=self.batch_size)
-
+            self.model.fit(self.X_train[i], self.X_train[i],epochs=self.num_epochs,batch_size=self.batch_size,validation_data=(self.X_test[i], self.X_test[i]))
+    
+    def predict(self,i):
+        X_pred = self.model.predict(self.X_test[i])
+        
     def autoencode_dataset(self,dataset):
-
         return
     
     def save(self,model_path):

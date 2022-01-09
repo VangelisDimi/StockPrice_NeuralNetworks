@@ -1,3 +1,4 @@
+from scipy.sparse import data
 from utils import ArgumentParser, create_dataset
 from agent import CNN_autoencoder
 import pandas as pd
@@ -21,3 +22,5 @@ if __name__ == "__main__":
         agent.save('models/cnn_autoencoder_'+parser.model_name)
     else:
         agent.open('models/cnn_autoencoder_'+parser.model_name)
+
+    agent.predict(1)

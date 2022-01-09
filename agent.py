@@ -148,12 +148,12 @@ class LSTM_autoencoder():
             
             X_t = []
             y_t = []
-            for j in range(self.train_size - self.window):
-                X_t.append(_dataset[j:(j + self.window),0])
-                y_t.append(_dataset[j + self.window, 0])
+            for j in range(self.window,self.train_size):
+                X_t.append(_dataset[j-self.window:j, 0])
+                y_t.append(_dataset[j, 0])
             X_t, y_t = np.array(X_t), np.array(y_t)
             X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
-
+            
             self.X_train.append(X_t)
             self.y_train.append(y_t)
 
@@ -168,12 +168,12 @@ class LSTM_autoencoder():
 
             X_t = []
             y_t = []
-            for j in range(self.test_size- self.window):
-                X_t.append(_dataset[j:(j + self.window),0])
-                y_t.append(_dataset[j + self.window, 0])
+            for j in range(self.window,self.test_size):
+                X_t.append(_dataset[j-self.window:j, 0])
+                y_t.append(_dataset[j, 0])
             X_t, y_t = np.array(X_t), np.array(y_t)
             X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
-
+            
             self.X_test.append(X_t)
             self.y_test.append(y_t)
 

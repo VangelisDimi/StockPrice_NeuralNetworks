@@ -3,6 +3,7 @@ from utils import ArgumentParser, create_dataset
 from agent import CNN_autoencoder
 import pandas as pd
 import os
+import random
 
 if __name__ == "__main__":
     if not os.path.exists('output'):
@@ -19,8 +20,18 @@ if __name__ == "__main__":
     agent = CNN_autoencoder(dataset=dataset_joined, latent_dim=parser.latent_dim, batch_size=parser.batch_size, num_epochs=parser.num_epochs, window=parser.window)
     if parser.train:
         agent.fit_encoder()
+        agent.fit_autoencoder()
         agent.save('models/cnn_autoencoder_'+parser.model_name)
     else:
         agent.load('models/cnn_autoencoder_'+parser.model_name)
 
-    agent.predict(1)
+    #Testing
+    num_predictions=parser.number_of_time_series_selected
+    for i in random.sample(range(len(dataset_joined)),num_predictions):
+        continue
+
+    #Encode given datasets
+    dataset_i_reduced = agent.encode_dataset(dataset_i)
+    dataset_q_reduced = agent.encode_dataset(dataset_i)
+    dataset_i_reduced.to_csv('output/'+parser.od, index=False)
+    dataset_q_reduced.to_csv('output/'+parser.oq, index=False)

@@ -348,14 +348,39 @@ class CNN_autoencoder():
         X_pred = self.autoencoder.predict(self.X_test[i])
         
     def encode_dataset(self,dataset):
-        return dataset
+        column_names=['id']
+        for i in range(1,self.window*self.latent_dim): column_names.append(i)
+        df=pd.DataFrame()
+        df=df.set_axis(column_names, axis='columns', inplace=False)
+
+        for i in range(len(dataset)):
+            _dataset = self.dataset.iloc[i, :].values
+            _dataset = np.array([_dataset]).T
+            _dataset = self.scaler.fit_transform(_dataset)
+
+            X_t = []
+            for j in range(self.window,self.data_size,self.window):
+                X_t.append(_dataset[j-self.window:j, 0])
+            X_t = np.array(X_t)
+            X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
+
+            X_pred = self.encoder.predict(self.X_t)
+            
+            X_encoded=[]
+            for j in range(len(X_pred)):
+                for z in range(len(X_pred[i,:])):
+                    print(z)
+            df[i]=X_pred
+        return df
     
     def save(self,path=None):
         if path is None:
             path=self.checkpoint
-        self.model.save(path)
+        self.encoder.save(path+"/encode")
+        self.autoencoder.save(path+"/autoencode")
     
     def load(self,path=None):
         if path is None:
             path=self.checkpoint
-        self.model = keras.models.load_model(path)
+        self.encoder = keras.models.load_model(path+"/encode")
+        self.autoencoder = keras.models.load_model(path+"/autoencode")

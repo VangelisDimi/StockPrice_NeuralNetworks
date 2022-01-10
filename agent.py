@@ -26,7 +26,8 @@ class multiLayer_LSTM():
         self.num_layers = num_layers
         self.dropout_rate = dropout_rate
         self.window = window
-        
+        self.checkpoint = "models/multilayer_lstm.pkl"
+
         self.data_size=self.dataset.shape[1]-1
         self.train_size=math.floor(self.data_size*train_size)
         self.test_size=self.data_size-self.train_size
@@ -66,15 +67,15 @@ class multiLayer_LSTM():
 
         #Create network
         self.model = Sequential()
-        #First Layer
-        self.model.add(LSTM(units = self.num_units, return_sequences = True, input_shape = (self.X_train[0].shape[1], 1)))
-        self.model.add(Dropout(self.dropout_rate))
+
         #Add layers
         for i in range(self.num_layers):
-            self.model.add(LSTM(units = self.num_units, return_sequences = True))
+            if i==0:
+                self.model.add(LSTM(units = self.num_units, return_sequences = True, input_shape = (self.X_train[0].shape[1], 1)))
+            else:
+                self.model.add(LSTM(units = self.num_units, return_sequences = True))
             self.model.add(Dropout(self.dropout_rate))
-        self.model.add(LSTM(units = self.num_units))
-        self.model.add(Dropout(self.dropout_rate))
+
         #Output Layer
         self.model.add(Dense(units = 1))
         #Compile
@@ -84,7 +85,7 @@ class multiLayer_LSTM():
         #Fit all datasets to model
         for i in range(len(self.X_train)):
             print("Fitting: ",i+1,"/",len(self.X_train))
-            self.model.fit(self.X_train[i], self.y_train[i], epochs=self.num_epochs, batch_size=self.batch_size)
+            self.model.fit(self.X_train[i], self.X_train[i],epochs=self.num_epochs,batch_size=self.batch_size,validation_data=(self.X_test[i], self.X_test[i]))
 
     def predict(self,i):
         #Predict results for stock
@@ -105,11 +106,15 @@ class multiLayer_LSTM():
         predicted_stock_price = self.scaler.inverse_transform(predicted_stock_price)
         return predicted_stock_price
     
-    def save(self,model_path):
-        self.model.save(model_path)
+    def save(self,path=None):
+        if path is None:
+            path=self.checkpoint
+        self.model.save(path)
     
-    def open(self,model_path):
-        self.model = keras.models.load_model(model_path)
+    def load(self,path=None):
+        if path is None:
+            path=self.checkpoint
+        self.model = keras.models.load_model(path)
 
 
 
@@ -124,6 +129,7 @@ class LSTM_autoencoder():
         self.dropout_rate = dropout_rate
         self.window = window
         self.mae = mae
+        self.checkpoint = "models/lstm_autoencoder.pkl"
 
         self.data_size=self.dataset.shape[1]-1
         self.train_size=math.floor(self.data_size*train_size)
@@ -179,14 +185,16 @@ class LSTM_autoencoder():
 
         #Create network
         self.model = Sequential()
-        #First Layer
-        self.model.add(LSTM(units=self.num_units,input_shape=(self.X_train[0].shape[1],1)))
-        self.model.add(Dropout(self.dropout_rate))
-        self.model.add(RepeatVector(n=self.X_train[0].shape[1]))
+
         #Add layers
         for i in range(self.num_layers):
-            self.model.add(LSTM(units = self.num_units, return_sequences = True))
+            if i==0:
+                self.model.add(LSTM(units=self.num_units,input_shape=(self.X_train[0].shape[1],1)))
+            else:
+                self.model.add(LSTM(units = self.num_units, return_sequences = True))
             self.model.add(Dropout(self.dropout_rate))
+            if i==0:
+                self.model.add(RepeatVector(n=self.X_train[0].shape[1]))
         #Output Layer
         self.model.add(TimeDistributed(Dense(units=1)))
         #Compile
@@ -196,8 +204,8 @@ class LSTM_autoencoder():
         #Fit all datasets to model
         for i in range(len(self.X_train)):
             print("Fitting: ",i+1,"/",len(self.X_train))
-            self.model.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.batch_size,validation_split=0.1,shuffle=False)
-    
+            self.model.fit(self.X_train[i], self.X_train[i],epochs=self.num_epochs,batch_size=self.batch_size,validation_data=(self.X_test[i], self.X_test[i]))
+
     def predict(self,i):
         X_pred = self.model.predict(self.X_test[i])
         test_mae_loss = np.mean(np.abs(X_pred - self.X_test[i]), axis=1)
@@ -213,11 +221,15 @@ class LSTM_autoencoder():
 
         return test_score_df
 
-    def save(self,model_path):
-        self.model.save(model_path)
+    def save(self,path=None):
+        if path is None:
+            path=self.checkpoint
+        self.model.save(path)
     
-    def open(self,model_path):
-        self.model = keras.models.load_model(model_path)
+    def load(self,path=None):
+        if path is None:
+            path=self.checkpoint
+        self.model = keras.models.load_model(path)
 
 
 class CNN_autoencoder():
@@ -228,6 +240,7 @@ class CNN_autoencoder():
         self.num_epochs = num_epochs
         self.window = window
         self.latent_dim = latent_dim
+        self.checkpoint = "models/cnn_autoencoder.pkl"
 
         self.data_size=self.dataset.shape[1]-1
         self.train_size=math.floor(self.data_size*train_size)
@@ -307,8 +320,12 @@ class CNN_autoencoder():
     def autoencode_dataset(self,dataset):
         return
     
-    def save(self,model_path):
-        self.model.save(model_path)
+    def save(self,path=None):
+        if path is None:
+            path=self.checkpoint
+        self.model.save(path)
     
-    def open(self,model_path):
-        self.model = keras.models.load_model(model_path)
+    def load(self,path=None):
+        if path is None:
+            path=self.checkpoint
+        self.model = keras.models.load_model(path)

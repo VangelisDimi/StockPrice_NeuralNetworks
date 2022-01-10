@@ -22,6 +22,8 @@ if __name__ == "__main__":
     else:
         agent.load('models/lstm_multilayer_'+parser.model_name)
 
+    print("Accuracy is: ",agent.score())
+
     num_predictions=parser.number_of_time_series_selected
     for i in random.sample(range(len(dataset)),num_predictions):
         #With dataset training

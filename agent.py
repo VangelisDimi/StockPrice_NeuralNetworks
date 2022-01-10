@@ -57,6 +57,26 @@ class multiLayer_LSTM():
             self.X_train.append(X_t)
             self.y_train.append(y_t)
         
+        #Create list of testing sets
+        self.X_test=[]
+        self.y_test=[]
+        for i in range(len(self.dataset)):
+            # Normalize the dataset
+            _dataset = self.dataset.iloc[i, self.train_size+1:].values
+            _dataset = np.array([_dataset]).T
+            _dataset = self.scaler.transform(_dataset)
+
+            X_t = []
+            y_t = []
+            for j in range(self.window,self.test_size):
+                X_t.append(_dataset[j-self.window:j, 0])
+                y_t.append(_dataset[j, 0])
+            X_t, y_t = np.array(X_t), np.array(y_t)
+            X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
+            
+            self.X_test.append(X_t)
+            self.y_test.append(y_t)
+        
 
         #Create list of testing sets
         self.dataset_test=[]
@@ -68,15 +88,15 @@ class multiLayer_LSTM():
 
         #Create network
         self.model = Sequential()
-
+        #First Layer
+        self.model.add(LSTM(units = self.num_units, return_sequences = True, input_shape = (self.X_train[0].shape[1], 1)))
+        self.model.add(Dropout(self.dropout_rate))
         #Add layers
         for i in range(self.num_layers):
-            if i==0:
-                self.model.add(LSTM(units = self.num_units, return_sequences = True, input_shape = (self.X_train[0].shape[1], 1)))
-            else:
-                self.model.add(LSTM(units = self.num_units, return_sequences = True))
+            self.model.add(LSTM(units = self.num_units, return_sequences = True))
             self.model.add(Dropout(self.dropout_rate))
-
+        self.model.add(LSTM(units = self.num_units))
+        self.model.add(Dropout(self.dropout_rate))
         #Output Layer
         self.model.add(Dense(units = 1))
         #Compile
@@ -89,23 +109,17 @@ class multiLayer_LSTM():
             self.model.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.batch_size)
 
     def predict(self,i):
-        #Predict results for stock
-        dataset_total = self.dataset.iloc[i,1:].values
-        dataset_total= np.array([dataset_total]).T
-        inputs = dataset_total[self.train_size - self.test_size - self.window:]
-
-        inputs = inputs.reshape(-1,1)
-        inputs = self.scaler.transform(inputs)
-
-        X_test = []
-        for y in range(self.window, self.test_size + self.window):
-            X_test.append(inputs[y-self.window:y, 0])
-        X_test = np.array(X_test)
-        X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
-
-        predicted_stock_price = self.model.predict(X_test)
+        predicted_stock_price = self.model.predict(self.X_test[i])
         predicted_stock_price = self.scaler.inverse_transform(predicted_stock_price)
-        return predicted_stock_price
+
+        predict_df = pd.DataFrame(index=self.dataset.columns[self.train_size+1+self.window:])
+        predict_df['predicted_close'] = predicted_stock_price
+
+        _dataset = self.dataset.iloc[i, self.train_size+1:].values
+        _dataset = np.array([_dataset]).T
+        predict_df['close'] = _dataset[self.window:]
+
+        return predict_df
     
     def score(self):
         X_pred = self.model.predict(self.X_train)
@@ -190,16 +204,14 @@ class LSTM_autoencoder():
 
         #Create network
         self.model = Sequential()
-
+        #First Layer
+        self.model.add(LSTM(units=self.num_units,input_shape=(self.X_train[0].shape[1],1)))
+        self.model.add(Dropout(self.dropout_rate))
+        self.model.add(RepeatVector(n=self.X_train[0].shape[1]))
         #Add layers
         for i in range(self.num_layers):
-            if i==0:
-                self.model.add(LSTM(units=self.num_units,input_shape=(self.X_train[0].shape[1],1)))
-            else:
-                self.model.add(LSTM(units = self.num_units, return_sequences = True))
+            self.model.add(LSTM(units = self.num_units, return_sequences = True))
             self.model.add(Dropout(self.dropout_rate))
-            if i==0:
-                self.model.add(RepeatVector(n=self.X_train[0].shape[1]))
         #Output Layer
         self.model.add(TimeDistributed(Dense(units=1)))
         #Compile

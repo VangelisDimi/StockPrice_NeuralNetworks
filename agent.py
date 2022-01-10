@@ -6,6 +6,7 @@ absl.logging.set_verbosity(absl.logging.ERROR)
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 import math
 from tensorflow import keras
 from keras.models import Sequential,Model
@@ -13,6 +14,10 @@ from keras.layers import Dense
 from keras.layers import LSTM,RepeatVector,TimeDistributed,Input,Conv1D,UpSampling1D,MaxPooling1D
 from keras.layers import Dropout
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+from tensorflow import keras
+np.random.seed(21)
 from sklearn.preprocessing import StandardScaler
 
 
@@ -20,6 +25,7 @@ class multiLayer_LSTM():
     def __init__(self, dataset, batch_size=3, num_epochs=10, num_layers=3, num_units=50, dropout_rate=0.2, window=60, train_size = 0.8):
         #Initialize network
         self.dataset = dataset
+        self.checkpoint = "./multi_LSTM.chkpt"
         self.num_units = num_units
         self.batch_size = batch_size
         self.num_epochs = num_epochs
@@ -81,49 +87,32 @@ class multiLayer_LSTM():
         self.model.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
     def fit(self):
-        #Fit all datasets to model
-        for i in range(len(self.X_train)):
-            print("Fitting: ",i+1,"/",len(self.X_train))
-            self.model.fit(self.X_train[i], self.y_train[i], epochs=self.num_epochs, batch_size=self.batch_size)
+        self.model.fit(self.train_X, self.train_Y, epochs=self.num_epochs, batch_size=self.batch_size, verbose=2)
 
-    def predict(self,i):
-        #Predict results for stock
-        dataset_total = self.dataset.iloc[i,1:].values
-        dataset_total= np.array([dataset_total]).T
-        inputs = dataset_total[self.train_size - self.test_size - self.window:]
+    def save(self, path=None):
+        if path is None:
+            path = self.checkpoint
+        self.model.save(path)
 
-        inputs = inputs.reshape(-1,1)
-        inputs = self.scaler.transform(inputs)
-
-        X_test = []
-        for y in range(self.window, self.test_size + self.window):
-            X_test.append(inputs[y-self.window:y, 0])
-        X_test = np.array(X_test)
-        X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
-
-        predicted_stock_price = self.model.predict(X_test)
-        predicted_stock_price = self.scaler.inverse_transform(predicted_stock_price)
-        return predicted_stock_price
-    
-    def save(self,model_path):
-        self.model.save(model_path)
-    
-    def open(self,model_path):
-        self.model = keras.models.load_model(model_path)
-
-
+    def load(self, path=None):
+        if path is None:
+            path = self.checkpoint
+        self.model = keras.models.load_model(path)
 
 class LSTM_autoencoder():
-    def __init__(self, dataset, mae=0.65, batch_size=3, num_epochs=10, num_layers=2, num_units=50, dropout_rate=0.2, window=60, train_size = 0.8):
-        #Initialize network
+    def __init__(self, dataset, batch_size, num_epochs, num_layers, num_units, window, mae, train_size, dropout_rate=0.2, look_back=1):
+        
         self.dataset = dataset
-        self.num_units = num_units
+        self.checkpoint = "./LSTM_autoenc.chkpt"
+
         self.batch_size = batch_size
         self.num_epochs = num_epochs
         self.num_layers = num_layers
+        self.num_units = num_units
         self.dropout_rate = dropout_rate
         self.window = window
         self.mae = mae
+        
 
         self.data_size=self.dataset.shape[1]-1
         self.train_size=math.floor(self.data_size*train_size)
@@ -213,17 +202,22 @@ class LSTM_autoencoder():
 
         return test_score_df
 
-    def save(self,model_path):
-        self.model.save(model_path)
-    
-    def open(self,model_path):
-        self.model = keras.models.load_model(model_path)
+    def save(self, path=None):
+        if path is None:
+            path = self.checkpoint
+        self.model.save(path)
+
+    def load(self, path=None):
+        if path is None:
+            path = self.checkpoint
+        self.model = keras.models.load_model(path)
 
 
 class CNN_autoencoder():
     def __init__(self, dataset, latent_dim=3, batch_size=3, num_epochs=10, window=10, train_size=0.8):
         #Initialize network
         self.dataset = dataset
+        self.checkpoint = "./CNN.chkpt"
         self.batch_size = batch_size
         self.num_epochs = num_epochs
         self.window = window
@@ -296,19 +290,48 @@ class CNN_autoencoder():
         self.model.compile(optimizer='adam', loss='binary_crossentropy')
 
     def fit(self):
-        #Fit all datasets to model
-        for i in range(len(self.X_train)):
-            print("Fitting: ",i+1,"/",len(self.X_train))
-            self.model.fit(self.X_train[i], self.X_train[i],epochs=self.num_epochs,batch_size=self.batch_size,validation_data=(self.X_test[i], self.X_test[i]))
-    
-    def predict(self,i):
-        X_pred = self.model.predict(self.X_test[i])
-        
-    def autoencode_dataset(self,dataset):
-        return
-    
-    def save(self,model_path):
-        self.model.save(model_path)
-    
-    def open(self,model_path):
-        self.model = keras.models.load_model(model_path)
+        self.model.fit(self.train_X, self.train_Y, epochs=self.num_epochs, batch_size=self.batch_size, verbose=2)
+
+    def score(self):
+        # make predictions
+        self.pred_train_X = self.model.predict(self.train_X)
+        self.pred_test_X = self.model.predict(self.test_X)
+
+        # invert predictions
+        self.pred_train_X = self.scaler.inverse_transform(self.pred_train_X)
+        train_Y = self.scaler.inverse_transform([self.train_Y])
+        self.pred_test_X = self.scaler.inverse_transform(self.pred_test_X)
+        test_Y = self.scaler.inverse_transform([self.test_Y])
+
+        # calculate root mean squared error
+        train_score = math.sqrt(mean_squared_error(train_Y[0], self.pred_train_X[:,0]))
+        print('Train Score: %.2f RMSE' % (train_score))
+        test_score = math.sqrt(mean_squared_error(test_Y[0], self.pred_test_X[:,0]))
+        print('Test Score: %.2f RMSE' % (test_score))
+
+    def plot(self):
+        # shift train predictions for plotting
+        train_plot = np.empty_like(self.dataset)
+        train_plot[:, :] = np.nan
+        train_plot[self.look_back:len(self.pred_train_X)+self.look_back, :] = self.pred_train_X
+
+        # shift test predictions for plotting
+        test_plot = np.empty_like(self.dataset)
+        test_plot[:, :] = np.nan
+        test_plot[len(self.pred_train_X)+(self.look_back*2)+1:len(self.dataset)-1, :] = self.pred_test_X
+
+        # plot baseline and predictions
+        plt.plot(self.scaler.inverse_transform(self.dataset))
+        plt.plot(train_plot)
+        plt.plot(test_plot)
+        plt.show()
+
+    def save(self, path=None):
+        if path is None:
+            path = self.checkpoint
+        self.model.save(path)
+
+    def load(self, path=None):
+        if path is None:
+            path = self.checkpoint
+        self.model = keras.models.load_model(path)

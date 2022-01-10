@@ -89,43 +89,6 @@ class multiLayer_LSTM():
     def fit(self):
         self.model.fit(self.train_X, self.train_Y, epochs=self.num_epochs, batch_size=self.batch_size, verbose=2)
 
-    def score(self):
-        self.pred_test_X = self.model.predict(self.test_X)
-        self.pred_test_X = self.scaler.inverse_transform(self.pred_test_X[0])
-        # # make predictions
-        # self.pred_train_X = self.model.predict(self.train_X)
-        # self.pred_test_X = self.model.predict(self.test_X)
-
-        # # invert predictions
-        # self.pred_train_X = self.scaler.inverse_transform(self.pred_train_X)
-        # train_Y = self.scaler.inverse_transform([self.train_Y])
-        # self.pred_test_X = self.scaler.inverse_transform(self.pred_test_X)
-        # test_Y = self.scaler.inverse_transform([self.test_Y])
-
-        # # calculate root mean squared error
-        # train_score = math.sqrt(mean_squared_error(train_Y[0], self.pred_train_X[:,0]))
-        # print('Train Score: %.2f RMSE' % (train_score))
-        test_score = math.sqrt(mean_squared_error(self.test_Y[0], self.pred_test_X[:,0]))
-        print('Test Score: %.2f RMSE' % (test_score))
-
-    def plot(self):
-        # shift train predictions for plotting
-        train_plot = np.empty_like(self.dataset)
-        train_plot[:, :] = np.nan
-        train_plot[self.look_back:len(self.pred_train_X)+self.look_back, :] = self.pred_train_X
-
-        # shift test predictions for plotting
-        test_plot = np.empty_like(self.dataset)
-        test_plot[:, :] = np.nan
-        test_plot[len(self.pred_train_X)+(self.look_back*2)+1:len(self.dataset)-1, :] = self.pred_test_X
-
-        # plot baseline and predictions
-        plt.plot(self.scaler.inverse_transform(self.dataset))
-        plt.plot(train_plot)
-        plt.plot(test_plot)
-        plt.show()
-        plt.savefig('plot_multiLayer_LSTM.png')
-
     def save(self, path=None):
         if path is None:
             path = self.checkpoint

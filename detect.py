@@ -3,7 +3,6 @@ from utils import ArgumentParser, create_dataset
 import os
 import random
 import matplotlib.pyplot as plt
-import numpy as np
 
 if __name__ == "__main__":
     if not os.path.exists('output'):

@@ -100,7 +100,7 @@ class multiLayer_LSTM():
         #Output Layer
         self.model.add(Dense(units = 1))
         #Compile
-        self.model.compile(optimizer = 'adam', loss = 'mean_squared_error')
+        self.model.compile(optimizer = 'adam', loss = 'mae')
 
     def fit(self):
         #Fit all datasets to model
@@ -321,7 +321,7 @@ class CNN_autoencoder():
         conv1_2 = Conv1D(1, 3, activation="relu", padding="same")(pool1)
         encoded = MaxPooling1D(strides=3, padding="same")(conv1_2)
         self.encoder = Model(input, encoded)
-        self.encoder.compile(optimizer='adam', loss='binary_crossentropy')
+        self.encoder.compile(optimizer='adam', loss='mae')
         # Decoder
         conv2_1 = Conv1D(1, 3, activation="relu", padding="same")(encoded)
         up1 = UpSampling1D(2)(conv2_1)
@@ -331,7 +331,7 @@ class CNN_autoencoder():
         output = Conv1D(1, 3, activation='sigmoid', padding='same')(up2)
         #Compile
         self.autoencoder = Model(input, output)
-        self.autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
+        self.autoencoder.compile(optimizer='adam', loss='mae')
 
     def fit_autoencoder(self):
         #Fit all datasets to model

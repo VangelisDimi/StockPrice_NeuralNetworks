@@ -247,11 +247,12 @@ class CNN_autoencoder():
             
             X_t = []
             y_t = []
-            for j in range(self.window,self.train_size):
+            for j in range(self.window,self.train_size,self.window):
                 X_t.append(_dataset[j-self.window:j, 0])
                 y_t.append(_dataset[j, 0])
             X_t, y_t = np.array(X_t), np.array(y_t)
             X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
+            y_t = np.reshape(y_t, (y_t.shape[0], 1))
 
             self.X_train.append(X_t.astype('float32'))
             self.y_train.append(y_t.astype('float32'))
@@ -267,11 +268,12 @@ class CNN_autoencoder():
 
             X_t = []
             y_t = []
-            for j in range(self.window,self.test_size):
+            for j in range(self.window,self.test_size,self.window):
                 X_t.append(_dataset[j-self.window:j, 0])
                 y_t.append(_dataset[j, 0])
             X_t, y_t = np.array(X_t), np.array(y_t)
             X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
+            y_t = np.reshape(y_t, (y_t.shape[0], 1))
 
             self.X_test.append(X_t.astype('float32'))
             self.y_test.append(y_t.astype('float32'))
@@ -281,9 +283,11 @@ class CNN_autoencoder():
         input = Input(shape=(self.window,1))
         # Encoder
         conv1_1 = Conv1D(16, 3, activation="relu", padding="same")(input)
-        pool1 = MaxPooling1D(2, padding="same")(conv1_1)
+        pool1 = MaxPooling1D(strides=3, padding="same")(conv1_1)
         conv1_2 = Conv1D(1, 3, activation="relu", padding="same")(pool1)
-        encoded = MaxPooling1D(2, padding="same")(conv1_2)
+        encoded = MaxPooling1D(strides=3, padding="same")(conv1_2)
+        self.encoder = Model(input, encoded)
+        self.encoder.compile(optimizer='adam', loss='binary_crossentropy')
         # Decoder
         conv2_1 = Conv1D(1, 3, activation="relu", padding="same")(encoded)
         up1 = UpSampling1D(2)(conv2_1)
@@ -292,19 +296,25 @@ class CNN_autoencoder():
         #Output
         output = Conv1D(1, 3, activation='sigmoid', padding='same')(up2)
         #Compile
-        self.model = Model(input, output)
-        self.model.compile(optimizer='adam', loss='binary_crossentropy')
+        self.autoencoder = Model(input, output)
+        self.autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
 
-    def fit(self):
+    def fit_autoencoder(self):
         #Fit all datasets to model
         for i in range(len(self.X_train)):
             print("Fitting: ",i+1,"/",len(self.X_train))
-            self.model.fit(self.X_train[i], self.X_train[i],epochs=self.num_epochs,batch_size=self.batch_size,validation_data=(self.X_test[i], self.X_test[i]))
+            self.autoencoder.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.batch_size,validation_data=(self.X_test[i], self.y_test[i]))
+    
+    def fit_encoder(self):
+        #Fit all datasets to model
+        for i in range(len(self.X_train)):
+            print("Fitting: ",i+1,"/",len(self.X_train))
+            self.encoder.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.batch_size,validation_data=(self.X_test[i], self.y_test[i]))
     
     def predict(self,i):
-        X_pred = self.model.predict(self.X_test[i])
+        X_pred = self.autoencoder.predict(self.X_test[i])
         
-    def autoencode_dataset(self,dataset):
+    def encode_dataset(self,dataset):
         return
     
     def save(self,model_path):

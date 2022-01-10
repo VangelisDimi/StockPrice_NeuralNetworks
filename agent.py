@@ -106,7 +106,7 @@ class multiLayer_LSTM():
         #Fit all datasets to model
         for i in range(len(self.X_train)):
             print("Fitting: ",i+1,"/",len(self.X_train))
-            self.model.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.batch_size)
+            self.model.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.batch_size, validation_split=0.1)
 
     def predict(self,i):
         predicted_stock_price = self.model.predict(self.X_test[i])
@@ -221,7 +221,7 @@ class LSTM_autoencoder():
         #Fit all datasets to model
         for i in range(len(self.X_train)):
             print("Fitting: ",i+1,"/",len(self.X_train))
-            self.model.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.batch_size)
+            self.model.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.batch_size, validation_split=0.1)
 
     def predict(self,i):
         X_pred = self.model.predict(self.X_test[i])
@@ -327,23 +327,22 @@ class CNN_autoencoder():
         up1 = UpSampling1D(2)(conv2_1)
         conv2_2 = Conv1D(16, 2, activation='relu')(up1)
         up2 = UpSampling1D(2)(conv2_2)
-        #Output
-        output = Conv1D(1, 3, activation='sigmoid', padding='same')(up2)
+        decoded = Conv1D(1, 3, activation='sigmoid', padding='same')(up2)
         #Compile
-        self.autoencoder = Model(input, output)
+        self.autoencoder = Model(input, decoded)
         self.autoencoder.compile(optimizer='adam', loss='mae')
 
     def fit_autoencoder(self):
         #Fit all datasets to model
         for i in range(len(self.X_train)):
             print("Fitting: ",i+1,"/",len(self.X_train))
-            self.autoencoder.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.batch_size,validation_data=(self.X_test[i], self.y_test[i]))
+            self.autoencoder.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.batch_size, validation_split=0.1)
     
     def fit_encoder(self):
         #Fit all datasets to model
         for i in range(len(self.X_train)):
             print("Fitting: ",i+1,"/",len(self.X_train))
-            self.encoder.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.batch_size,validation_data=(self.X_test[i], self.y_test[i]))
+            self.encoder.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.batch_size, validation_split=0.1)
     
     def predict(self,i):
         X_pred = self.autoencoder.predict(self.X_test[i])

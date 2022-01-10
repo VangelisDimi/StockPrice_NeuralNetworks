@@ -3,6 +3,7 @@ from utils import ArgumentParser, create_dataset
 import os
 import random
 import matplotlib.pyplot as plt
+import numpy as np
 
 if __name__ == "__main__":
     if not os.path.exists('output'):
@@ -19,7 +20,7 @@ if __name__ == "__main__":
         agent.fit()
         agent.save('models/lstm_autoencoder_'+parser.model_name)
     else:
-        agent.load('models/lstm_autoencoder_'+parser.model_name)
+        agent.open('models/lstm_autoencoder_'+parser.model_name)
 
 
     num_predictions=parser.number_of_time_series_selected

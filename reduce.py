@@ -18,7 +18,7 @@ if __name__ == "__main__":
     
     agent = CNN_autoencoder(dataset=dataset_joined, latent_dim=parser.latent_dim, batch_size=parser.batch_size, num_epochs=parser.num_epochs, window=parser.window)
     if parser.train:
-        agent.fit()
+        agent.fit_encoder()
         agent.save('models/cnn_autoencoder_'+parser.model_name)
     else:
         agent.open('models/cnn_autoencoder_'+parser.model_name)

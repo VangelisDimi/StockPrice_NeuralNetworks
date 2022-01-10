@@ -14,7 +14,7 @@ from keras.layers import LSTM,RepeatVector,TimeDistributed,Input,Conv1D,UpSampli
 from keras.layers import Dropout
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
-
+from sklearn.metrics import accuracy_score
 
 class multiLayer_LSTM():
     def __init__(self, dataset, batch_size=3, num_epochs=10, num_layers=3, num_units=50, dropout_rate=0.2, window=60, train_size = 0.8):
@@ -107,6 +107,10 @@ class multiLayer_LSTM():
         predicted_stock_price = self.scaler.inverse_transform(predicted_stock_price)
         return predicted_stock_price
     
+    def score(self):
+        X_pred = self.model.predict(self.X_train)
+        return accuracy_score(self.y_train, X_pred)
+
     def save(self,path=None):
         if path is None:
             path=self.checkpoint
@@ -222,6 +226,10 @@ class LSTM_autoencoder():
 
         return test_score_df
 
+    def score(self):
+        X_pred = self.model.predict(self.X_train)
+        return accuracy_score(self.y_train, X_pred)
+
     def save(self,path=None):
         if path is None:
             path=self.checkpoint
@@ -329,7 +337,7 @@ class CNN_autoencoder():
         X_pred = self.autoencoder.predict(self.X_test[i])
         
     def encode_dataset(self,dataset):
-        return
+        return dataset
     
     def save(self,path=None):
         if path is None:

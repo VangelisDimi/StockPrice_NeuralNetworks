@@ -57,6 +57,7 @@ class multiLayer_LSTM():
             self.X_train.append(X_t)
             self.y_train.append(y_t)
         
+
         #Create list of testing sets
         self.dataset_test=[]
         for i in range(len(self.dataset)):
@@ -85,7 +86,7 @@ class multiLayer_LSTM():
         #Fit all datasets to model
         for i in range(len(self.X_train)):
             print("Fitting: ",i+1,"/",len(self.X_train))
-            self.model.fit(self.X_train[i], self.X_train[i],epochs=self.num_epochs,batch_size=self.batch_size,validation_data=(self.X_test[i], self.X_test[i]))
+            self.model.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.batch_size)
 
     def predict(self,i):
         #Predict results for stock
@@ -204,7 +205,7 @@ class LSTM_autoencoder():
         #Fit all datasets to model
         for i in range(len(self.X_train)):
             print("Fitting: ",i+1,"/",len(self.X_train))
-            self.model.fit(self.X_train[i], self.X_train[i],epochs=self.num_epochs,batch_size=self.batch_size,validation_data=(self.X_test[i], self.X_test[i]))
+            self.model.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.batch_size)
 
     def predict(self,i):
         X_pred = self.model.predict(self.X_test[i])

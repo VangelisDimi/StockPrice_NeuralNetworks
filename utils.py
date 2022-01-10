@@ -18,7 +18,7 @@ class ArgumentParser():
         parser.add_argument('-dropout_rate', type=float, default=0.2)
         parser.add_argument('-train_size', type=float, default=0.8)
         parser.add_argument('-latent_dim', type=int, default=3)
-        parser.add_argument('--train', default=True)
+        parser.add_argument('--train', action="store_true", default=True)
         parser.add_argument('-model_name', type=str, default='model')
 
         args = parser.parse_args()

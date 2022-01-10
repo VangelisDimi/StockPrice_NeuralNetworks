@@ -21,6 +21,6 @@ if __name__ == "__main__":
         agent.fit_encoder()
         agent.save('models/cnn_autoencoder_'+parser.model_name)
     else:
-        agent.open('models/cnn_autoencoder_'+parser.model_name)
+        agent.load('models/cnn_autoencoder_'+parser.model_name)
 
     agent.predict(1)

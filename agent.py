@@ -126,28 +126,33 @@ class multiLayer_LSTM():
         plt.show()
         plt.savefig('plot_multiLayer_LSTM.png')
 
-    def save(self):
-        self.model.save(self.checkpoint)
+    def save(self, path=None):
+        if path is None:
+            path = self.checkpoint
+        self.model.save(path)
 
-    def load(self):
-        self.model = keras.models.load_model(self.checkpoint)
+    def load(self, path=None):
+        if path is None:
+            path = self.checkpoint
+        self.model = keras.models.load_model(path)
 
-class LSTM_encoder_decoder():
-    def __init__(self, dataset, batch_size, num_epochs, num_layers, num_units, layers_size, window, mae, dropout_rate=0.2, look_back=1):
+class LSTM_autoencoder():
+    def __init__(self, dataset, batch_size, num_epochs, num_layers, num_units, window, mae, train_size, dropout_rate=0.2, look_back=1):
         
         self.dataset = dataset
-        self.checkpoint = "./LSTM_enc_dec.chkpt"
+        self.checkpoint = "./LSTM_autoenc.chkpt"
 
         self.batch_size = batch_size
         self.num_epochs = num_epochs
         self.num_layers = num_layers
+        self.num_units = num_units
         self.dropout_rate = dropout_rate
         self.window = window
         self.mae = mae
         
 
         self.data_size=self.dataset.shape[1]-1
-        self.train_size=math.floor(self.data_size*0.8)
+        self.train_size=math.floor(self.data_size*train_size)
         self.test_size=self.data_size-self.train_size
 
         #Create and fit scaler
@@ -234,11 +239,15 @@ class LSTM_encoder_decoder():
 
         return test_score_df
 
-    def save(self):
-        self.model.save(self.checkpoint)
+    def save(self, path=None):
+        if path is None:
+            path = self.checkpoint
+        self.model.save(path)
 
-    def load(self):
-        self.model = keras.models.load_model(self.checkpoint)
+    def load(self, path=None):
+        if path is None:
+            path = self.checkpoint
+        self.model = keras.models.load_model(path)
 
 
 class CNN_autoencoder():
@@ -354,8 +363,12 @@ class CNN_autoencoder():
         plt.plot(test_plot)
         plt.show()
 
-    def save(self):
-        self.model.save(self.checkpoint)
+    def save(self, path=None):
+        if path is None:
+            path = self.checkpoint
+        self.model.save(path)
 
-    def load(self):
-        self.model = keras.models.load_model(self.checkpoint)
+    def load(self, path=None):
+        if path is None:
+            path = self.checkpoint
+        self.model = keras.models.load_model(path)

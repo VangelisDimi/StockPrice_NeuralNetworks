@@ -20,7 +20,7 @@ if __name__ == "__main__":
         agent.fit()
         agent.save('models/lstm_multilayer_'+parser.model_name)
     else:
-        agent.open('models/lstm_multilayer_'+parser.model_name)
+        agent.load('models/lstm_multilayer_'+parser.model_name)
 
     num_predictions=parser.number_of_time_series_selected
     for i in random.sample(range(len(dataset)),num_predictions):

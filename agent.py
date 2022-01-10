@@ -317,9 +317,9 @@ class CNN_autoencoder():
         input = Input(shape=(self.window,1))
         # Encoder
         conv1_1 = Conv1D(16, 3, activation="relu", padding="same")(input)
-        pool1 = MaxPooling1D(strides=3, padding="same")(conv1_1)
+        pool1 = MaxPooling1D(strides=2, padding="same")(conv1_1)
         conv1_2 = Conv1D(1, 3, activation="relu", padding="same")(pool1)
-        encoded = MaxPooling1D(strides=3, padding="same")(conv1_2)
+        encoded = MaxPooling1D(strides=2, padding="same")(conv1_2)
         self.encoder = Model(input, encoded)
         self.encoder.compile(optimizer='adam', loss='mae')
         # Decoder

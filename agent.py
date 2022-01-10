@@ -13,13 +13,14 @@ from keras.layers import Dropout
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
-
+from tensorflow import keras
 numpy.random.seed(21)
 
 class multiLayer_LSTM():
     def __init__(self, dataset, batch_size, num_epochs, num_layers, num_units, layers_size, dropout_rate=0.2, look_back=1):
 
         self.dataset = dataset
+        self.checkpoint = "./multi_LSTM.chkpt"
         self.num_units = num_units
         self.batch_size = batch_size
         self.num_epochs = num_epochs
@@ -52,7 +53,7 @@ class multiLayer_LSTM():
 
     def score(self):
         self.pred_test_X = self.model.predict(self.test_X)
-        self.pred_test_X = self.scaler.inverse_transform(self.pred_test_X)
+        self.pred_test_X = self.scaler.inverse_transform(self.pred_test_X[0])
         # # make predictions
         # self.pred_train_X = self.model.predict(self.train_X)
         # self.pred_test_X = self.model.predict(self.test_X)
@@ -87,11 +88,17 @@ class multiLayer_LSTM():
         plt.show()
         plt.savefig('plot_multiLayer_LSTM.png')
 
+    def save(self):
+        self.model.save(self.checkpoint)
+
+    def load(self):
+        self.model = keras.models.load_model(self.checkpoint)
 
 class LSTM_encoder_decoder():
     def __init__(self, dataset, batch_size, num_epochs, num_layers, num_units, layers_size, dropout_rate=0.2, look_back=1):
         
         self.dataset = dataset
+        self.checkpoint = "./LSTM_enc_dec.chkpt"
 
         self.batch_size = batch_size
         self.num_epochs = num_epochs
@@ -149,12 +156,17 @@ class LSTM_encoder_decoder():
         plt.plot(test_plot)
         plt.show()
 
+    def save(self):
+        self.model.save(self.checkpoint)
+
+    def load(self):
+        self.model = keras.models.load_model(self.checkpoint)
 
 class CNN_autoencoder():
     def __init__(self, dataset, batch_size, num_epochs, num_layers, num_units, layers_size, dropout_rate=0.2, look_back=1):
 
         self.dataset = dataset
-
+        self.checkpoint = "./CNN.chkpt"
         self.batch_size = batch_size
         self.num_epochs = num_epochs
         self.num_layers = num_layers
@@ -210,3 +222,9 @@ class CNN_autoencoder():
         plt.plot(train_plot)
         plt.plot(test_plot)
         plt.show()
+
+    def save(self):
+        self.model.save(self.checkpoint)
+
+    def load(self):
+        self.model = keras.models.load_model(self.checkpoint)

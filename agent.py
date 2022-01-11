@@ -10,7 +10,7 @@ import math
 from tensorflow import keras
 from keras.models import Sequential,Model
 from keras.layers import Dense
-from keras.layers import LSTM,RepeatVector,TimeDistributed,Input,Conv1D,UpSampling1D,MaxPooling1D
+from keras.layers import LSTM,RepeatVector,TimeDistributed,Input,Conv1D,UpSampling1D,MaxPooling1D,BatchNormalization
 from keras.layers import Dropout
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
@@ -319,11 +319,13 @@ class CNN_autoencoder():
         conv1_1 = Conv1D(16, 3, activation="relu", padding="same")(input)
         pool1 = MaxPooling1D(strides=2, padding="same")(conv1_1)
         conv1_2 = Conv1D(1, 3, activation="relu", padding="same")(pool1)
-        encoded = MaxPooling1D(strides=2, padding="same")(conv1_2)
+        conv1_2 = BatchNormalization()(conv1_2)
+        encoded = MaxPooling1D(strides=2, padding="same",name='encoded')(conv1_2)
         self.encoder = Model(input, encoded)
         self.encoder.compile(optimizer='adam', loss='mae')
         # Decoder
         conv2_1 = Conv1D(1, 3, activation="relu", padding="same")(encoded)
+        conv2_1 = BatchNormalization()(conv2_1)
         up1 = UpSampling1D(2)(conv2_1)
         conv2_2 = Conv1D(16, 2, activation='relu')(up1)
         up2 = UpSampling1D(2)(conv2_2)
@@ -331,6 +333,8 @@ class CNN_autoencoder():
         #Compile
         self.autoencoder = Model(input, decoded)
         self.autoencoder.compile(optimizer='adam', loss='mae')
+
+        self.latent_dim=self.encoder.get_layer('encoded').output_shape[1]
 
     def fit_autoencoder(self):
         #Fit all datasets to model
@@ -348,13 +352,10 @@ class CNN_autoencoder():
         X_pred = self.autoencoder.predict(self.X_test[i])
         
     def encode_dataset(self,dataset):
-        column_names=['id']
-        for i in range(1,self.window*self.latent_dim): column_names.append(i)
         df=pd.DataFrame()
-        df=df.set_axis(column_names, axis='columns', inplace=False)
 
         for i in range(len(dataset)):
-            _dataset = self.dataset.iloc[i, :].values
+            _dataset = self.dataset.iloc[i,1:].values
             _dataset = np.array([_dataset]).T
             _dataset = self.scaler.fit_transform(_dataset)
 
@@ -364,13 +365,14 @@ class CNN_autoencoder():
             X_t = np.array(X_t)
             X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
 
-            X_pred = self.encoder.predict(self.X_t)
-            
-            X_encoded=[]
+            X_pred = self.encoder.predict(X_t)
+            X_pred=self.scaler.inverse_transform(self.format_timeseries(X_pred))
+
+            row=[]
+            row.append(dataset['id'][i])
             for j in range(len(X_pred)):
-                for z in range(len(X_pred[i,:])):
-                    print(z)
-            df[i]=X_pred
+                row.append(X_pred[j,0])
+            df = df.append([row])
         return df
     
     def save(self,path=None):
@@ -384,3 +386,11 @@ class CNN_autoencoder():
             path=self.checkpoint
         self.encoder = keras.models.load_model(path+"/encode")
         self.autoencoder = keras.models.load_model(path+"/autoencode")
+
+    def format_timeseries(self,timeseries):
+        #Concat splitted timeseries
+        X=[]
+        for i in range(len(timeseries)):
+            for j in range(len(timeseries[i])):
+                X.append(timeseries[i,j])
+        return X

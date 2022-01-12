@@ -93,16 +93,16 @@ class multiLayer_LSTM():
         for i in range(len(self.X_train)):
             inputs.append(keras.layers.Input(shape=(self.X_train[0].shape[1], 1)))
         merged = keras.layers.Concatenate(axis=1)(inputs)
-        lstms.append(LSTM(units = self.num_units, return_sequences = True, input_shape = (self.X_train[0].shape[1], 1)))(merged)
-        dropouts.append(Dropout(self.dropout_rate))(lstms[lc])
+        lstms.append(LSTM(units = self.num_units, return_sequences = True, input_shape = (self.X_train[0].shape[1], 1))(merged))
+        dropouts.append(Dropout(self.dropout_rate)(lstms[lc]))
         lc += 1
         for i in range(self.num_layers):
-            lstms.append(LSTM(units = self.num_units, return_sequences = True))(dropouts[dc])
+            lstms.append(LSTM(units = self.num_units, return_sequences = True)(dropouts[dc]))
             dc += 1
-            dropouts.append(Dropout(self.dropout_rate))(lstms[lc])
+            dropouts.append(Dropout(self.dropout_rate)(lstms[lc]))
             lc += 1
         output = Dense(units = 1)(dropouts[dc])
-        self.model = keras.models.Model(inputs=inputs, output=output)
+        self.model = keras.models.Model(inputs=inputs, outputs=output)
 
         # #Create network
         # self.model = Sequential()
@@ -118,7 +118,7 @@ class multiLayer_LSTM():
         # #Output Layer
         # self.model.add(Dense(units = 1))
         # #Compile
-        # self.model.compile(optimizer = 'adam', loss = 'mae')
+        self.model.compile(optimizer = 'adam', loss = 'mae')
 
     def fit(self):
         #Fit all datasets to model

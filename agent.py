@@ -86,21 +86,30 @@ class multiLayer_LSTM():
             self.dataset_test.append(_dataset)
 
 
-        #Create network
-        self.model = Sequential()
-        #First Layer
-        self.model.add(LSTM(units = self.num_units, return_sequences = True, input_shape = (self.X_train[0].shape[1], 1)))
-        self.model.add(Dropout(self.dropout_rate))
-        #Add layers
-        for i in range(self.num_layers):
-            self.model.add(LSTM(units = self.num_units, return_sequences = True))
-            self.model.add(Dropout(self.dropout_rate))
-        self.model.add(LSTM(units = self.num_units))
-        self.model.add(Dropout(self.dropout_rate))
-        #Output Layer
-        self.model.add(Dense(units = 1))
-        #Compile
-        self.model.compile(optimizer = 'adam', loss = 'mae')
+        inputs = []
+        for i in range(len(self.X_train)):
+            inputs[i] = keras.layers.Input(shape=(self.X_train[0].shape[1], 1))
+        merged = keras.layers.Concatenate(axis=1)(inputs)
+        dense1 = LSTM(units = self.num_units, return_sequences = True, input_shape = (self.X_train[0].shape[1], 1))(merged)
+        dropout = Dropout(self.dropout_rate)(dense1)
+        output = Dense(units = 1)(dropout)
+        self.model = keras.models.Model(inputs=inputs, output=output)
+
+        # #Create network
+        # self.model = Sequential()
+        # #First Layer
+        # self.model.add(LSTM(units = self.num_units, return_sequences = True, input_shape = (self.X_train[0].shape[1], 1)))
+        # self.model.add(Dropout(self.dropout_rate))
+        # #Add layers
+        # for i in range(self.num_layers):
+        #     self.model.add(LSTM(units = self.num_units, return_sequences = True))
+        #     self.model.add(Dropout(self.dropout_rate))
+        # self.model.add(LSTM(units = self.num_units))
+        # self.model.add(Dropout(self.dropout_rate))
+        # #Output Layer
+        # self.model.add(Dense(units = 1))
+        # #Compile
+        # self.model.compile(optimizer = 'adam', loss = 'mae')
 
     def fit(self):
         #Fit all datasets to model

@@ -87,13 +87,22 @@ class multiLayer_LSTM():
 
 
         inputs = []
+        lstms = []
+        dropouts = []
+        lc, dc = 0, 0
         for i in range(len(self.X_train)):
             inputs.append(keras.layers.Input(shape=(self.X_train[0].shape[1], 1)))
         merged = keras.layers.Concatenate(axis=1)(inputs)
-        dense1 = LSTM(units = self.num_units, return_sequences = True, input_shape = (self.X_train[0].shape[1], 1))(merged)
-        dropout = Dropout(self.dropout_rate)(dense1)
-        output = Dense(units = 1)(dropout)
-        self.model = Model(inputs=inputs, outputs=output)
+        lstms.append(LSTM(units = self.num_units, return_sequences = True, input_shape = (self.X_train[0].shape[1], 1)))(merged)
+        dropouts.append(Dropout(self.dropout_rate))(lstms[lc])
+        lc += 1
+        for i in range(self.num_layers):
+            lstms.append(LSTM(units = self.num_units, return_sequences = True))(dropouts[dc])
+            dc += 1
+            dropouts.append(Dropout(self.dropout_rate))(lstms[lc])
+            lc += 1
+        output = Dense(units = 1)(dropouts[dc])
+        self.model = keras.models.Model(inputs=inputs, output=output)
 
         # #Create network
         # self.model = Sequential()
@@ -109,13 +118,13 @@ class multiLayer_LSTM():
         # #Output Layer
         # self.model.add(Dense(units = 1))
         # #Compile
-        self.model.compile(optimizer = 'adam', loss = 'mae')
+        # self.model.compile(optimizer = 'adam', loss = 'mae')
 
     def fit(self):
         #Fit all datasets to model
         # for i in range(len(self.X_train)):
             # print("Fitting: ",i+1,"/",len(self.X_train))
-        self.model.fit(self.X_train, self.y_train,epochs=self.num_epochs,batch_size=self.batch_size, validation_split=0.1)
+            self.model.fit(self.X_train, self.y_train,epochs=self.num_epochs,batch_size=self.batch_size, validation_split=0.1)
 
     def predict(self,i):
         predicted_stock_price = self.model.predict(self.X_test[i])

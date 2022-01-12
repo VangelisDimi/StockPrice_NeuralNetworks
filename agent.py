@@ -14,7 +14,7 @@ from keras.layers import LSTM,RepeatVector,TimeDistributed,Input,Conv1D,UpSampli
 from keras.layers import Dropout
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import mean_absolute_error
 
 class multiLayer_LSTM():
     def __init__(self, dataset, batch_size=3, num_epochs=10, num_layers=3, num_units=50, dropout_rate=0.2, window=60, train_size = 0.8):
@@ -119,11 +119,8 @@ class multiLayer_LSTM():
         _dataset = np.array([_dataset]).T
         predict_df['close'] = _dataset[self.window:]
 
+        print("Mean absolute error of prediction : %.5f" % mean_absolute_error(predict_df['close'],predict_df['predicted_close']))
         return predict_df
-    
-    def score(self):
-        X_pred = self.model.predict(self.X_train)
-        return accuracy_score(self.y_train, X_pred)
 
     def save(self,path=None):
         if path is None:
@@ -215,7 +212,7 @@ class LSTM_autoencoder():
         #Output Layer
         self.model.add(TimeDistributed(Dense(units=1)))
         #Compile
-        self.model.compile(loss='mae', optimizer='adam')
+        self.model.compile(optimizer='adam',loss='mae')
 
     def fit(self):
         #Fit all datasets to model
@@ -236,11 +233,9 @@ class LSTM_autoencoder():
         _dataset = np.array([_dataset]).T
         test_score_df['close'] = _dataset[self.window:]
 
-        return test_score_df
+        print("Mean absolute error of autoencoding: %.5f" % test_score_df['loss'].mean())
 
-    def score(self):
-        X_pred = self.model.predict(self.X_train)
-        return accuracy_score(self.y_train, X_pred)
+        return test_score_df
 
     def save(self,path=None):
         if path is None:
@@ -327,7 +322,7 @@ class CNN_autoencoder():
         conv2_1 = Conv1D(1, 3, activation="relu", padding="same")(encoded)
         conv2_1 = BatchNormalization()(conv2_1)
         up1 = UpSampling1D(2)(conv2_1)
-        conv2_2 = Conv1D(16, 2, activation='relu')(up1)
+        conv2_2 = Conv1D(16, 3, activation='relu', padding="same")(up1)
         up2 = UpSampling1D(2)(conv2_2)
         decoded = Conv1D(1, 3, activation='sigmoid', padding='same')(up2)
         #Compile
@@ -350,6 +345,9 @@ class CNN_autoencoder():
     
     def predict(self,i):
         X_pred = self.autoencoder.predict(self.X_test[i])
+        print("Mean absolute error of autoencoding: %.5f" % 
+                mean_absolute_error( self.scaler.inverse_transform(self.format_timeseries(X_pred)),
+                                    self.scaler.inverse_transform(self.format_timeseries(self.X_test[i]))) )
         
     def encode_dataset(self,dataset):
         df=pd.DataFrame()

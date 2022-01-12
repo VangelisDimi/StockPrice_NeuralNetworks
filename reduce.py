@@ -28,7 +28,7 @@ if __name__ == "__main__":
     #Testing
     num_predictions=parser.number_of_time_series_selected
     for i in random.sample(range(len(dataset_joined)),num_predictions):
-        continue
+        agent.predict(i)
 
     #Encode given datasets
     dataset_i_reduced = agent.encode_dataset(dataset_i)

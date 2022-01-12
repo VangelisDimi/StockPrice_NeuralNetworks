@@ -249,13 +249,12 @@ class LSTM_autoencoder():
 
 
 class CNN_autoencoder():
-    def __init__(self, dataset, latent_dim=3, batch_size=3, num_epochs=10, window=10, train_size=0.8):
+    def __init__(self, dataset, batch_size=3, num_epochs=10, window=10, train_size=0.8):
         #Initialize network
         self.dataset = dataset
         self.batch_size = batch_size
         self.num_epochs = num_epochs
         self.window = window
-        self.latent_dim = latent_dim
         self.checkpoint = "models/cnn_autoencoder.pkl"
 
         self.data_size=self.dataset.shape[1]-1

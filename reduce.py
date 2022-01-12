@@ -32,6 +32,6 @@ if __name__ == "__main__":
 
     #Encode given datasets
     dataset_i_reduced = agent.encode_dataset(dataset_i)
-    dataset_q_reduced = agent.encode_dataset(dataset_i)
+    dataset_q_reduced = agent.encode_dataset(dataset_q)
     dataset_i_reduced.to_csv('output/'+parser.output_dataset_file,'\t', index=False, header=False, float_format='%.4f')
     dataset_q_reduced.to_csv('output/'+parser.output_query_file,'\t', index=False, header=False, float_format='%.4f')

@@ -76,15 +76,7 @@ class multiLayer_LSTM():
             
             self.X_test.append(X_t)
             self.y_test.append(y_t)
-        
-
-        #Create list of testing sets
-        self.dataset_test=[]
-        for i in range(len(self.dataset)):
-            _dataset = self.dataset.iloc[i, self.train_size+1:].values
-            _dataset = np.array([_dataset]).T
-            self.dataset_test.append(_dataset)
-
+            
 
         inputs = []
         lstms = []

@@ -55,7 +55,12 @@ class multiLayer_LSTM():
             
             self.X_train.append(X_t)
             self.y_train.append(y_t)
-        
+        self.X_train_concat=self.X_train[0]
+        self.y_train_concat=self.y_train[0]
+        for i in range(1,len(self.X_train)):
+            self.X_train_concat=np.append(self.X_train_concat,self.X_train[i],axis=0)
+            self.y_train_concat=np.append(self.y_train_concat,self.y_train[i],axis=0)
+
         #Create list of testing sets
         self.X_test=[]
         self.y_test=[]
@@ -94,12 +99,7 @@ class multiLayer_LSTM():
 
     def fit(self):
         #Fit all datasets to model
-        X_train=self.X_train[0]
-        y_train=self.y_train[0]
-        for i in range(1,len(self.X_train)):
-            X_train=np.append(X_train,self.X_train[i],axis=0)
-            y_train=np.append(y_train,self.y_train[i],axis=0)
-        self.model.fit(X_train, y_train,epochs=self.num_epochs,batch_size=self.batch_size, validation_split=0.1)
+        self.model.fit(self.X_train_concat, self.y_train_concat,epochs=self.num_epochs,batch_size=self.batch_size, validation_split=0.1)
 
     def predict(self,i):
         predicted_stock_price = self.model.predict(self.X_test[i])

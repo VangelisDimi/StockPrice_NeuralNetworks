@@ -32,19 +32,18 @@ class multiLayer_LSTM():
         self.train_size=math.floor(self.data_size*train_size)
         self.test_size=self.data_size-self.train_size
 
-        self.scaler = MinMaxScaler(feature_range=(0, 1))
+        self.scalers = [] 
 
         #Format data
         #Create list of training sets
         self.X_train=[]
         self.y_train=[]
-        self.dataset_train=[]
         for i in range(len(self.dataset)):
+            self.scalers.append(MinMaxScaler(feature_range=(0, 1)))
             # Normalize the dataset
             _dataset = self.dataset.iloc[i, 1:self.train_size+1].values
             _dataset= np.array([_dataset]).T
-            _dataset = self.scaler.fit_transform(_dataset)
-            self.dataset_train.append(_dataset)
+            _dataset = self.scalers[i].fit_transform(_dataset)
 
             X_t = []
             y_t = []
@@ -64,7 +63,7 @@ class multiLayer_LSTM():
             # Normalize the dataset
             _dataset = self.dataset.iloc[i, self.train_size+1:].values
             _dataset = np.array([_dataset]).T
-            _dataset = self.scaler.transform(_dataset)
+            _dataset = self.scalers[i].transform(_dataset)
 
             X_t = []
             y_t = []
@@ -76,51 +75,35 @@ class multiLayer_LSTM():
             
             self.X_test.append(X_t)
             self.y_test.append(y_t)
-            
 
-        inputs = []
-        lstms = []
-        dropouts = []
-        lc, dc = 0, 0
-        for i in range(len(self.X_train)):
-            inputs.append(keras.layers.Input(shape=(self.X_train[0].shape[1], 1)))
-        merged = keras.layers.Concatenate(axis=1)(inputs)
-        lstms.append(LSTM(units = self.num_units, return_sequences = True, input_shape = (self.X_train[0].shape[1], 1))(merged))
-        dropouts.append(Dropout(self.dropout_rate)(lstms[lc]))
-        lc += 1
+        #Create network
+        self.model = Sequential()
+        #First Layer
+        self.model.add(LSTM(units = self.num_units, return_sequences = True, input_shape = (self.X_train[0].shape[1], 1)))
+        self.model.add(Dropout(self.dropout_rate))
+        #Add layers
         for i in range(self.num_layers):
-            lstms.append(LSTM(units = self.num_units, return_sequences = True)(dropouts[dc]))
-            dc += 1
-            dropouts.append(Dropout(self.dropout_rate)(lstms[lc]))
-            lc += 1
-        output = Dense(units = 1)(dropouts[dc])
-        self.model = keras.models.Model(inputs=inputs, outputs=output)
-
-        # #Create network
-        # self.model = Sequential()
-        # #First Layer
-        # self.model.add(LSTM(units = self.num_units, return_sequences = True, input_shape = (self.X_train[0].shape[1], 1)))
-        # self.model.add(Dropout(self.dropout_rate))
-        # #Add layers
-        # for i in range(self.num_layers):
-        #     self.model.add(LSTM(units = self.num_units, return_sequences = True))
-        #     self.model.add(Dropout(self.dropout_rate))
-        # self.model.add(LSTM(units = self.num_units))
-        # self.model.add(Dropout(self.dropout_rate))
-        # #Output Layer
-        # self.model.add(Dense(units = 1))
-        # #Compile
+            self.model.add(LSTM(units = self.num_units, return_sequences = True))
+            self.model.add(Dropout(self.dropout_rate))
+        self.model.add(LSTM(units = self.num_units))
+        self.model.add(Dropout(self.dropout_rate))
+        #Output Layer
+        self.model.add(Dense(units = 1))
+        #Compile
         self.model.compile(optimizer = 'adam', loss = 'mae')
 
     def fit(self):
         #Fit all datasets to model
-        # for i in range(len(self.X_train)):
-            # print("Fitting: ",i+1,"/",len(self.X_train))
-            self.model.fit(self.X_train, self.y_train,epochs=self.num_epochs,batch_size=self.batch_size, validation_split=0.1)
+        X_train=self.X_train[0]
+        y_train=self.y_train[0]
+        for i in range(1,len(self.X_train)):
+            X_train=np.append(X_train,self.X_train[i],axis=0)
+            y_train=np.append(y_train,self.y_train[i],axis=0)
+        self.model.fit(X_train, y_train,epochs=self.num_epochs,batch_size=self.batch_size, validation_split=0.1)
 
     def predict(self,i):
         predicted_stock_price = self.model.predict(self.X_test[i])
-        predicted_stock_price = self.scaler.inverse_transform(predicted_stock_price)
+        predicted_stock_price = self.scalers[i].inverse_transform(predicted_stock_price)
 
         predict_df = pd.DataFrame(index=self.dataset.columns[self.train_size+1+self.window:])
         predict_df['predicted_close'] = predicted_stock_price
@@ -160,23 +143,19 @@ class LSTM_autoencoder():
         self.data_size=self.dataset.shape[1]-1
         self.train_size=math.floor(self.data_size*train_size)
         self.test_size=self.data_size-self.train_size
-
-        #Create and fit scaler
-        self.scaler = StandardScaler()
-        for i in range(len(self.dataset)):
-            _dataset = self.dataset.iloc[i, 1:self.train_size+1].values
-            _dataset= np.array([_dataset]).T
-            self.scaler = self.scaler.fit(_dataset)
+        
+        self.scalers = []
 
         #Format data
         #Create list of training sets
         self.X_train=[]
         self.y_train=[]
         for i in range(len(self.dataset)):
+            self.scalers.append(StandardScaler())
             # Normalize the dataset
             _dataset = self.dataset.iloc[i, 1:self.train_size+1].values
             _dataset= np.array([_dataset]).T
-            _dataset = self.scaler.transform(_dataset)
+            _dataset = self.scalers[i].fit_transform(_dataset)
             
             X_t = []
             y_t = []
@@ -196,7 +175,7 @@ class LSTM_autoencoder():
             # Normalize the dataset
             _dataset = self.dataset.iloc[i, self.train_size+1:].values
             _dataset = np.array([_dataset]).T
-            _dataset = self.scaler.transform(_dataset)
+            _dataset = self.scalers[i].transform(_dataset)
 
             X_t = []
             y_t = []
@@ -271,17 +250,18 @@ class CNN_autoencoder():
         self.train_size=math.floor(self.data_size*train_size)
         self.test_size=self.data_size-self.train_size
 
-        self.scaler = MinMaxScaler(feature_range=(0, 1))
+        self.scalers = []
 
         #Format data
         #Create list of training sets
         self.X_train=[]
         self.y_train=[]
         for i in range(len(self.dataset)):
+            self.scalers.append(MinMaxScaler(feature_range=(0, 1)))
             # Normalize the dataset
             _dataset = self.dataset.iloc[i, 1:self.train_size+1].values
             _dataset= np.array([_dataset]).T
-            _dataset = self.scaler.fit_transform(_dataset)
+            _dataset = self.scalers[i].fit_transform(_dataset)
             
             X_t = []
             y_t = []
@@ -302,7 +282,7 @@ class CNN_autoencoder():
             # Normalize the dataset
             _dataset = self.dataset.iloc[i, self.train_size+1:].values
             _dataset = np.array([_dataset]).T
-            _dataset = self.scaler.fit_transform(_dataset)
+            _dataset = self.scalers[i].transform(_dataset)
 
             X_t = []
             y_t = []
@@ -355,8 +335,8 @@ class CNN_autoencoder():
     def predict(self,i):
         X_pred = self.autoencoder.predict(self.X_test[i])
         print("Mean absolute error of autoencoding: %.5f" % 
-                mean_absolute_error( self.scaler.inverse_transform(self.format_timeseries(X_pred)),
-                                    self.scaler.inverse_transform(self.format_timeseries(self.X_test[i]))) )
+                mean_absolute_error( self.scalers[i].inverse_transform(self.format_timeseries(X_pred)),
+                                    self.scalers[i].inverse_transform(self.format_timeseries(self.X_test[i]))) )
         
     def encode_dataset(self,dataset):
         df=pd.DataFrame()
@@ -373,7 +353,7 @@ class CNN_autoencoder():
             X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
 
             X_pred = self.encoder.predict(X_t)
-            X_pred=self.scaler.inverse_transform(self.format_timeseries(X_pred))
+            X_pred=self.scalers[i].inverse_transform(self.format_timeseries(X_pred))
 
             row=[]
             row.append(dataset['id'][i])

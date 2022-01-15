@@ -167,6 +167,11 @@ class LSTM_autoencoder():
             
             self.X_train.append(X_t)
             self.y_train.append(y_t)
+        self.X_train_concat=self.X_train[0]
+        self.y_train_concat=self.y_train[0]
+        for i in range(1,len(self.X_train)):
+            self.X_train_concat=np.append(self.X_train_concat,self.X_train[i],axis=0)
+            self.y_train_concat=np.append(self.y_train_concat,self.y_train[i],axis=0)
 
         #Create list of testing sets
         self.X_test=[]
@@ -205,9 +210,7 @@ class LSTM_autoencoder():
 
     def fit(self):
         #Fit all datasets to model
-        for i in range(len(self.X_train)):
-            print("Fitting: ",i+1,"/",len(self.X_train))
-            self.model.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.batch_size, validation_split=0.1)
+        self.model.fit(self.X_train_concat, self.y_train_concat,epochs=self.num_epochs,batch_size=self.batch_size, validation_split=0.1)
 
     def predict(self,i):
         X_pred = self.model.predict(self.X_test[i])
@@ -274,6 +277,11 @@ class CNN_autoencoder():
 
             self.X_train.append(X_t.astype('float32'))
             self.y_train.append(y_t.astype('float32'))
+        self.X_train_concat=self.X_train[0]
+        self.y_train_concat=self.y_train[0]
+        for i in range(1,len(self.X_train)):
+            self.X_train_concat=np.append(self.X_train_concat,self.X_train[i],axis=0)
+            self.y_train_concat=np.append(self.y_train_concat,self.y_train[i],axis=0)
 
         #Create list of testing sets
         self.X_test=[]
@@ -322,15 +330,11 @@ class CNN_autoencoder():
 
     def fit_autoencoder(self):
         #Fit all datasets to model
-        for i in range(len(self.X_train)):
-            print("Fitting: ",i+1,"/",len(self.X_train))
-            self.autoencoder.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.batch_size, validation_split=0.1)
+        self.autoencoder.fit(self.X_train_concat, self.y_train_concat,epochs=self.num_epochs,batch_size=self.batch_size, validation_split=0.1)
     
     def fit_encoder(self):
         #Fit all datasets to model
-        for i in range(len(self.X_train)):
-            print("Fitting: ",i+1,"/",len(self.X_train))
-            self.encoder.fit(self.X_train[i], self.y_train[i],epochs=self.num_epochs,batch_size=self.batch_size, validation_split=0.1)
+        self.encoder.fit(self.X_train_concat, self.y_train_concat,epochs=self.num_epochs,batch_size=self.batch_size, validation_split=0.1)
     
     def predict(self,i):
         X_pred = self.autoencoder.predict(self.X_test[i])
@@ -342,9 +346,10 @@ class CNN_autoencoder():
         df=pd.DataFrame()
 
         for i in range(len(dataset)):
+            scaler=MinMaxScaler(feature_range=(0, 1))
             _dataset = self.dataset.iloc[i,1:].values
             _dataset = np.array([_dataset]).T
-            _dataset = self.scaler.fit_transform(_dataset)
+            _dataset = scaler.fit_transform(_dataset)
 
             X_t = []
             for j in range(self.window,self.data_size,self.window):
@@ -353,7 +358,7 @@ class CNN_autoencoder():
             X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
 
             X_pred = self.encoder.predict(X_t)
-            X_pred=self.scalers[i].inverse_transform(self.format_timeseries(X_pred))
+            X_pred=scaler.inverse_transform(self.format_timeseries(X_pred))
 
             row=[]
             row.append(dataset['id'][i])

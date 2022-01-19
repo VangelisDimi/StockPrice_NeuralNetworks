@@ -18,7 +18,7 @@ if __name__ == "__main__":
     dataset_q=create_dataset(parser.queryset)
     dataset_joined=pd.concat([dataset_i, dataset_q], ignore_index=True)
     
-    agent = CNN_autoencoder(dataset=dataset_joined, batch_size=parser.batch_size, num_epochs=parser.num_epochs,window=parser.window)
+    agent = CNN_autoencoder(dataset=dataset_joined, batch_size=parser.batch_size, num_epochs=parser.num_epochs)
     if parser.train:
         agent.fit_encoder()
         agent.fit_autoencoder()

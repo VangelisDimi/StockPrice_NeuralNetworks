@@ -5,7 +5,7 @@ class ArgumentParser():
     def __init__(self):
         parser = argparse.ArgumentParser()
         parser.add_argument('-d', type=str, default="examples/nasdaq2007_17_input.csv")
-        parser.add_argument('-n', type=int, default=0)
+        parser.add_argument('-n', type=int, default=1)
         parser.add_argument('-q', type=str, default="examples/nasdaq2007_17_query.csv")
         parser.add_argument('-od', type=str, default="output_dataset.csv")
         parser.add_argument('-oq', type=str, default="output_query_file.csv")

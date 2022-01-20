@@ -90,6 +90,7 @@ class multiLayer_LSTM():
         for i in range(self.num_layers):
             self.model.add(LSTM(units = self.num_units, return_sequences = True))
             self.model.add(Dropout(self.dropout_rate))
+            self.model.add(Dense(units = self.num_units))
         self.model.add(LSTM(units = self.num_units))
         self.model.add(Dropout(self.dropout_rate))
         #Output Layer

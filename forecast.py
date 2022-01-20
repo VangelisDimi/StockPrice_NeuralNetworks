@@ -31,7 +31,7 @@ if __name__ == "__main__":
         s_dataset=dataset.iloc[[i]]
         s_dataset.index=[0]
         agent_single = multiLayer_LSTM(dataset=s_dataset, batch_size=100, num_epochs=50, 
-                    num_layers=1, num_units=50, window=40)
+                    num_layers=1, num_units=50, window=30)
         agent_single.fit()
         predicted_stock_price_s=agent_single.predict(0)
 

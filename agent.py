@@ -358,14 +358,13 @@ class CNN_autoencoder():
                 mean_absolute_error( self.scalers[i].inverse_transform(self.format_timeseries(X_pred)),
                                     self.scalers[i].inverse_transform(self.format_timeseries(self.X_test[i]))) )
         
-    def encode_dataset(self,dataset):
+    def encode_dataset(self):
         df=pd.DataFrame()
 
-        for i in range(len(dataset)):
-            scaler=MinMaxScaler(feature_range=(0, 1))
+        for i in range(len(self.dataset)):
             _dataset = self.dataset.iloc[i,1:].values
             _dataset = np.array([_dataset]).T
-            _dataset = scaler.fit_transform(_dataset)
+            _dataset = self.scalers[i].transform(_dataset)
 
             X_t = []
             for j in range(self.window,self.data_size,self.window):
@@ -374,10 +373,10 @@ class CNN_autoencoder():
             X_t = np.reshape(X_t, (X_t.shape[0], X_t.shape[1], 1))
 
             X_pred = self.encoder.predict(X_t)
-            X_pred=scaler.inverse_transform(self.format_timeseries(X_pred))
+            X_pred=self.scalers[i].inverse_transform(self.format_timeseries(X_pred))
 
             row=[]
-            row.append(dataset['id'][i])
+            row.append(self.dataset['id'][i])
             for j in range(len(X_pred)):
                 row.append(X_pred[j,0])
             df = df.append([row])

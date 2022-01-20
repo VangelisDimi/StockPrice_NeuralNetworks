@@ -1,5 +1,3 @@
-from curses import window
-from scipy.sparse import data
 from utils import ArgumentParser, create_dataset
 from agent import CNN_autoencoder
 import pandas as pd
@@ -32,7 +30,6 @@ if __name__ == "__main__":
         agent.predict(i)
 
     #Encode given datasets
-    dataset_i_reduced = agent.encode_dataset(dataset_i)
-    dataset_q_reduced = agent.encode_dataset(dataset_q)
-    dataset_i_reduced.to_csv('output/'+parser.output_dataset_file,'\t', index=False, header=False, float_format='%.4f')
-    dataset_q_reduced.to_csv('output/'+parser.output_query_file,'\t', index=False, header=False, float_format='%.4f')
+    dataset_reduced= agent.encode_dataset()
+    dataset_reduced.iloc[:len(dataset_i.index),:].to_csv('output/'+parser.output_dataset_file,'\t', index=False, header=False, float_format='%.4f')
+    dataset_reduced.iloc[len(dataset_i.index):,:].to_csv('output/'+parser.output_query_file,'\t', index=False, header=False, float_format='%.4f')

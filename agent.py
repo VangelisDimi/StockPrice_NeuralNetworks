@@ -204,6 +204,7 @@ class LSTM_autoencoder():
         for i in range(self.num_layers):
             self.model.add(LSTM(units = self.num_units, return_sequences = True))
             self.model.add(Dropout(self.dropout_rate))
+            self.model.add(Dense(units = self.num_units))
         #Output Layer
         self.model.add(TimeDistributed(Dense(units=1)))
         #Compile

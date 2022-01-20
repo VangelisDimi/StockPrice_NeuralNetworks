@@ -246,7 +246,7 @@ class CNN_autoencoder():
         self.dataset = dataset
         self.batch_size = batch_size
         self.num_epochs = num_epochs
-        self.window = 10
+        self.window = 20
         self.checkpoint = "models/cnn_autoencoder.pkl"
 
         self.data_size=self.dataset.shape[1]-1
@@ -320,7 +320,7 @@ class CNN_autoencoder():
         conv2_1 = Conv1D(1, 3, activation="relu", padding="same")(encoded)
         conv2_1 = BatchNormalization()(conv2_1)
         up1 = UpSampling1D(2)(conv2_1)
-        conv2_2 = Conv1D(16, 2, activation='relu')(up1)
+        conv2_2 = Conv1D(16, 3, activation='relu', padding="same")(up1)
         conv2_2 = BatchNormalization()(conv2_2)
         up2 = UpSampling1D(2)(conv2_2)
         decoded = Conv1D(1, 3, activation='sigmoid', padding='same')(up2)
